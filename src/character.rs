@@ -1,4 +1,4 @@
-use crate::dnd_utils::{stat_to_modifier, Stat, Dice, DeathSaves, Class, Stats, Skills};
+use crate::dnd_utils::{stat_to_modifier, Stat, Dice, DeathSaves, Class, Stats, Skills, proficiency_bonus};
 
 pub struct Character {
     pub name: String,
@@ -45,6 +45,19 @@ impl Default for Character {
             stats: Stats::default(),
             skills: Skills::default()
         }
+    }
+}
+
+impl Character {
+    pub fn test_character() -> Self {
+        let mut character = Self::default();
+        character.name = String::from("test character");
+        character.level = 5;
+        character.class = Class::Barbarian;
+        character.stats = Stats::test_stats();
+        character.skills = Skills::test_skills();
+        character.proficiency_bonus = proficiency_bonus(character.level);
+        character
     }
 }
 

@@ -5,7 +5,18 @@ pub fn stat_to_modifier(stat: i32) -> i32 {
     (stat - 10) / 2
 }
 
-#[derive(Debug, EnumIter)]
+pub fn proficiency_bonus(level: i32) -> i32 {
+    match level {
+        1..=4 => 2,
+        5..=8 => 3,
+        9..=12 => 4,
+        13..=16 => 5,
+        17..=20 => 6,
+        _ => 0,
+    }
+}
+
+#[derive(Debug, EnumIter, Clone, Copy)]
 pub enum StatType {
     Strength,
     Dexterity,
@@ -24,6 +35,17 @@ impl StatType {
             StatType::Intelligence => String::from("Intelligence"),
             StatType::Wisdom => String::from("Wisdom"),
             StatType::Charisma => String::from("Charisma"),
+        }
+    }
+
+    pub fn get_short_name(&self) -> String {
+        match self {
+            StatType::Strength => String::from("STR"),
+            StatType::Dexterity => String::from("DEX"),
+            StatType::Constitution => String::from("CON"),
+            StatType::Intelligence => String::from("INT"),
+            StatType::Wisdom => String::from("WIS"),
+            StatType::Charisma => String::from("CHA"),
         }
     }
 }
@@ -45,7 +67,7 @@ impl Stat {
         }
     }
 
-    pub fn update(&mut self, value: i32) {
+    pub fn set_value(&mut self, value: i32) {
         self.value = value;
         self.modifier = stat_to_modifier(value);
     }
@@ -96,6 +118,20 @@ impl Default for Stats {
 }
 
 impl Stats {
+    pub fn test_stats() -> Self {
+        let mut test_values = Stats::default();
+
+        // set some values
+        test_values.strength.set_value(18);
+        test_values.dexterity.set_value(16);
+        test_values.constitution.set_value(14);
+        test_values.intelligence.set_value(12);
+        test_values.wisdom.set_value(10);
+        test_values.charisma.set_value(8);
+
+        test_values
+    }
+
     pub fn get_stat(&mut self, stat_type: StatType) -> &mut Stat {
         match stat_type {
             StatType::Strength => &mut self.strength,
@@ -153,13 +189,22 @@ impl Stats {
 
     pub fn set_stat_value(&mut self, stat_type: StatType, value: i32) {
         match stat_type {
-            StatType::Strength => self.strength.update(value),
-            StatType::Dexterity => self.dexterity.update(value),
-            StatType::Constitution => self.constitution.update(value),
-            StatType::Intelligence => self.intelligence.update(value),
-            StatType::Wisdom => self.wisdom.update(value),
-            StatType::Charisma => self.charisma.update(value),
+            StatType::Strength => self.strength.set_value(value),
+            StatType::Dexterity => self.dexterity.set_value(value),
+            StatType::Constitution => self.constitution.set_value(value),
+            StatType::Intelligence => self.intelligence.set_value(value),
+            StatType::Wisdom => self.wisdom.set_value(value),
+            StatType::Charisma => self.charisma.set_value(value),
         }
+    }
+
+    pub fn update_modifiers(&mut self) {
+        self.strength.modifier = stat_to_modifier(self.strength.value);
+        self.dexterity.modifier = stat_to_modifier(self.dexterity.value);
+        self.constitution.modifier = stat_to_modifier(self.constitution.value);
+        self.intelligence.modifier = stat_to_modifier(self.intelligence.value);
+        self.wisdom.modifier = stat_to_modifier(self.wisdom.value);
+        self.charisma.modifier = stat_to_modifier(self.charisma.value);
     }
 }
 
@@ -287,13 +332,37 @@ impl SkillType {
             SkillType::Survival => String::from("Survival"),
         }
     }
+
+    pub fn get_base_stat(&self) -> StatType {
+        match self {
+            SkillType::Acrobatics => StatType::Dexterity,
+            SkillType::AnimalHandling => StatType::Wisdom,
+            SkillType::Arcana => StatType::Intelligence,
+            SkillType::Athletics => StatType::Strength,
+            SkillType::Deception => StatType::Charisma,
+            SkillType::History => StatType::Intelligence,
+            SkillType::Insight => StatType::Wisdom,
+            SkillType::Intimidation => StatType::Charisma,
+            SkillType::Investigation => StatType::Intelligence,
+            SkillType::Medicine => StatType::Wisdom,
+            SkillType::Nature => StatType::Intelligence,
+            SkillType::Perception => StatType::Wisdom,
+            SkillType::Performance => StatType::Charisma,
+            SkillType::Persuasion => StatType::Charisma,
+            SkillType::Religion => StatType::Intelligence,
+            SkillType::SleightOfHand => StatType::Dexterity,
+            SkillType::Stealth => StatType::Dexterity,
+            SkillType::Survival => StatType::Wisdom,
+        }
+    }
 }
 
-struct Skill {
+pub struct Skill {
     base_ability: StatType,
     skill_type: SkillType,
     proficiency: bool,
     expertise: bool,
+    other_bonus: i32,
 }
 
 pub struct Skills {
@@ -323,182 +392,189 @@ impl Default for Skills {
             acrobatics: Skill {
                 base_ability: StatType::Dexterity,
                 skill_type: SkillType::Acrobatics,
-                proficiency: true,
+                proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             animal_handling: Skill {
                 base_ability: StatType::Wisdom,
                 skill_type: SkillType::AnimalHandling,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             arcana: Skill {
                 base_ability: StatType::Intelligence,
                 skill_type: SkillType::Arcana,
-                proficiency: true,
+                proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             athletics: Skill {
                 base_ability: StatType::Strength,
                 skill_type: SkillType::Athletics,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             deception: Skill {
                 base_ability: StatType::Charisma,
                 skill_type: SkillType::Deception,
-                proficiency: true,
+                proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             history: Skill {
                 base_ability: StatType::Intelligence,
                 skill_type: SkillType::History,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             insight: Skill {
                 base_ability: StatType::Wisdom,
                 skill_type: SkillType::Insight,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             intimidation: Skill {
                 base_ability: StatType::Charisma,
                 skill_type: SkillType::Intimidation,
-                proficiency: true,
+                proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             investigation: Skill {
                 base_ability: StatType::Intelligence,
                 skill_type: SkillType::Investigation,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             medicine: Skill {
                 base_ability: StatType::Wisdom,
                 skill_type: SkillType::Medicine,
-                proficiency: true,
+                proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             nature: Skill {
                 base_ability: StatType::Intelligence,
                 skill_type: SkillType::Nature,
-                proficiency: true,
-                expertise: true,
+                proficiency: false,
+                expertise: false,
+                other_bonus: 0,
             },
             perception: Skill {
                 base_ability: StatType::Wisdom,
                 skill_type: SkillType::Perception,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             performance: Skill {
                 base_ability: StatType::Charisma,
                 skill_type: SkillType::Performance,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             persuasion: Skill {
                 base_ability: StatType::Charisma,
                 skill_type: SkillType::Persuasion,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             religion: Skill {
                 base_ability: StatType::Intelligence,
                 skill_type: SkillType::Religion,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             sleight_of_hand: Skill {
                 base_ability: StatType::Dexterity,
                 skill_type: SkillType::SleightOfHand,
                 proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             stealth: Skill {
                 base_ability: StatType::Dexterity,
                 skill_type: SkillType::Stealth,
-                proficiency: true,
+                proficiency: false,
                 expertise: false,
+                other_bonus: 0,
             },
             survival: Skill {
                 base_ability: StatType::Wisdom,
                 skill_type: SkillType::Survival,
                 proficiency: false,
-                expertise: true,
+                expertise: false,
+                other_bonus: 0,
             },
         }
     }
 }
 
 impl Skills {
-    pub fn get_skill(&mut self, skill_type: SkillType) -> &mut Skill {
+
+    pub fn test_skills() -> Self {
+        let mut test_values = Skills::default();
+
+        // add proficiency to some skills
+        test_values.acrobatics.proficiency = true;
+        test_values.animal_handling.proficiency = true;
+        test_values.arcana.proficiency = true;
+        test_values.athletics.proficiency = true;
+        test_values.deception.proficiency = true;
+
+        test_values.athletics.expertise = true;
+        test_values.deception.expertise = true;
+
+        test_values.religion.other_bonus = 10;
+
+        test_values
+    }
+
+    pub fn get_skill(&self, skill_type: SkillType) -> &Skill {
         match skill_type {
-            SkillType::Acrobatics => &mut self.acrobatics,
-            SkillType::AnimalHandling => &mut self.animal_handling,
-            SkillType::Arcana => &mut self.arcana,
-            SkillType::Athletics => &mut self.athletics,
-            SkillType::Deception => &mut self.deception,
-            SkillType::History => &mut self.history,
-            SkillType::Insight => &mut self.insight,
-            SkillType::Intimidation => &mut self.intimidation,
-            SkillType::Investigation => &mut self.investigation,
-            SkillType::Medicine => &mut self.medicine,
-            SkillType::Nature => &mut self.nature,
-            SkillType::Perception => &mut self.perception,
-            SkillType::Performance => &mut self.performance,
-            SkillType::Persuasion => &mut self.persuasion,
-            SkillType::Religion => &mut self.religion,
-            SkillType::SleightOfHand => &mut self.sleight_of_hand,
-            SkillType::Stealth => &mut self.stealth,
-            SkillType::Survival => &mut self.survival,
+            SkillType::Acrobatics => & self.acrobatics,
+            SkillType::AnimalHandling => & self.animal_handling,
+            SkillType::Arcana => & self.arcana,
+            SkillType::Athletics => & self.athletics,
+            SkillType::Deception => & self.deception,
+            SkillType::History => & self.history,
+            SkillType::Insight => & self.insight,
+            SkillType::Intimidation => & self.intimidation,
+            SkillType::Investigation => & self.investigation,
+            SkillType::Medicine => & self.medicine,
+            SkillType::Nature => & self.nature,
+            SkillType::Perception => & self.perception,
+            SkillType::Performance => & self.performance,
+            SkillType::Persuasion => & self.persuasion,
+            SkillType::Religion => & self.religion,
+            SkillType::SleightOfHand => & self.sleight_of_hand,
+            SkillType::Stealth => & self.stealth,
+            SkillType::Survival => & self.survival,
         }
     }
 
     pub fn get_skill_proficiency(&self, skill_type: SkillType) -> bool {
-        match skill_type {
-            SkillType::Acrobatics => self.acrobatics.proficiency,
-            SkillType::AnimalHandling => self.animal_handling.proficiency,
-            SkillType::Arcana => self.arcana.proficiency,
-            SkillType::Athletics => self.athletics.proficiency,
-            SkillType::Deception => self.deception.proficiency,
-            SkillType::History => self.history.proficiency,
-            SkillType::Insight => self.insight.proficiency,
-            SkillType::Intimidation => self.intimidation.proficiency,
-            SkillType::Investigation => self.investigation.proficiency,
-            SkillType::Medicine => self.medicine.proficiency,
-            SkillType::Nature => self.nature.proficiency,
-            SkillType::Perception => self.perception.proficiency,
-            SkillType::Performance => self.performance.proficiency,
-            SkillType::Persuasion => self.persuasion.proficiency,
-            SkillType::Religion => self.religion.proficiency,
-            SkillType::SleightOfHand => self.sleight_of_hand.proficiency,
-            SkillType::Stealth => self.stealth.proficiency,
-            SkillType::Survival => self.survival.proficiency,
-        }
+        self.get_skill(skill_type).proficiency
     }
 
     pub fn get_skill_expertise(&self, skill_type: SkillType) -> bool {
-        match skill_type {
-            SkillType::Acrobatics => self.acrobatics.expertise,
-            SkillType::AnimalHandling => self.animal_handling.expertise,
-            SkillType::Arcana => self.arcana.expertise,
-            SkillType::Athletics => self.athletics.expertise,
-            SkillType::Deception => self.deception.expertise,
-            SkillType::History => self.history.expertise,
-            SkillType::Insight => self.insight.expertise,
-            SkillType::Intimidation => self.intimidation.expertise,
-            SkillType::Investigation => self.investigation.expertise,
-            SkillType::Medicine => self.medicine.expertise,
-            SkillType::Nature => self.nature.expertise,
-            SkillType::Perception => self.perception.expertise,
-            SkillType::Performance => self.performance.expertise,
-            SkillType::Persuasion => self.persuasion.expertise,
-            SkillType::Religion => self.religion.expertise,
-            SkillType::SleightOfHand => self.sleight_of_hand.expertise,
-            SkillType::Stealth => self.stealth.expertise,
-            SkillType::Survival => self.survival.expertise,
-        }
+        self.get_skill(skill_type).expertise
+    }
+
+    pub fn get_skill_other_bonus(&self, skill_type: SkillType) -> i32 {
+        self.get_skill(skill_type).other_bonus
+    }
+
+    pub fn get_base_stat(&self, skill_type: SkillType) -> StatType {
+        self.get_skill(skill_type).base_ability
     }
 }

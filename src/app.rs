@@ -113,7 +113,7 @@ impl eframe::App for StatTracker {
 impl StatTracker {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         configure_text_styles(&cc.egui_ctx);
-        let def_char = Character::default();
+        let def_char = Character::test_character();
 
         Self {
             state: AppState::StatTracker,
