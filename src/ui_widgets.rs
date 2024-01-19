@@ -1,8 +1,8 @@
 use egui::{Sense, RichText};
-use epaint::{Vec2, Stroke};
+use epaint::{Vec2, Stroke, Pos2};
 use strum::IntoEnumIterator;
 
-use crate::{dnd_utils::{Stat, StatType, SkillType}, character::Character};
+use crate::{dnd_utils::{Stat, StatType, SkillType}, character::Character, app::EDIT_MODE};
 
 pub struct UiWidgets;
 
@@ -20,33 +20,42 @@ impl UiWidgets {
             ui.centered_and_justified(|ui| {
                 ui.label(format!("{} ({})", stat.get_value(), stat.get_modifier()));
             });
-            if ui.button("-").clicked() {
-                stat.subtract_one();
+            if unsafe { EDIT_MODE } {
+                if ui.button("-").clicked() {
+                    stat.subtract_one();
+                }
+                if ui.button("+").clicked() {
+                    stat.add_one();
+                }
             }
-            if ui.button("+").clicked() {
-                stat.add_one();
-            }
+            
         });
     }
 
     pub fn basic_character_info(&self, ui: &mut egui::Ui, character: &mut Character) {
         ui.horizontal_centered(|ui| {
-            ui.horizontal(|ui| {
-                ui.label("Name:");
-                ui.label(&character.name)
-            });
-            ui.horizontal(|ui| {
-                ui.label("Level:");
-                ui.label(&character.level.to_string())
-            });
-            ui.horizontal(|ui| {
-                ui.label("Class:");
-                ui.label(&character.class.get_name())
-            });
-            ui.horizontal(|ui| {
-                ui.label("Experience:");
-                ui.label(&character.experience.to_string())
-            });
+
+            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+
+            ui.label("Name:");
+            ui.label(&character.name);
+
+            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+
+            ui.label("Level:");
+            ui.label(&character.level.to_string());
+
+            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+
+            ui.label("Class:");
+            ui.label(&character.class.get_name());
+
+            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+
+            ui.label("Experience:");
+            ui.label(&character.experience.to_string());
+
+            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
         });
     }
 
@@ -119,4 +128,16 @@ pub fn centered_heading(ui: &mut egui::Ui, text: &str) {
     ui.centered_and_justified(|ui| {
         ui.heading(text);
     });
+}
+
+pub fn draw_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui::Color32) {
+    let (rect, _response) = ui.allocate_at_least(vec2, Sense::hover());
+
+    ui.painter().line_segment(
+        [Pos2::new(rect.left(), rect.top()), Pos2::new(rect.left(), rect.bottom())], 
+        Stroke::new(
+            1.0, 
+            color
+        )
+    );
 }

@@ -2,7 +2,47 @@ use strum::IntoEnumIterator; // 0.17.1
 use strum_macros::EnumIter;
 
 pub fn stat_to_modifier(stat: i32) -> i32 {
-    (stat - 10) / 2
+    ((stat - 10) as f32 / 2.0).floor() as i32  
+}
+
+// write tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stat_to_modifier() {
+        assert_eq!(stat_to_modifier(1), -5);
+        assert_eq!(stat_to_modifier(2), -4);
+        assert_eq!(stat_to_modifier(3), -4);
+        assert_eq!(stat_to_modifier(4), -3);
+        assert_eq!(stat_to_modifier(5), -3);
+        assert_eq!(stat_to_modifier(6), -2);
+        assert_eq!(stat_to_modifier(7), -2);
+        assert_eq!(stat_to_modifier(8), -1);
+        assert_eq!(stat_to_modifier(9), -1);
+        assert_eq!(stat_to_modifier(10), 0);
+        assert_eq!(stat_to_modifier(11), 0);
+        assert_eq!(stat_to_modifier(12), 1);
+        assert_eq!(stat_to_modifier(13), 1);
+        assert_eq!(stat_to_modifier(14), 2);
+        assert_eq!(stat_to_modifier(15), 2);
+        assert_eq!(stat_to_modifier(16), 3);
+        assert_eq!(stat_to_modifier(17), 3);
+        assert_eq!(stat_to_modifier(18), 4);
+        assert_eq!(stat_to_modifier(19), 4);
+        assert_eq!(stat_to_modifier(20), 5);
+        assert_eq!(stat_to_modifier(21), 5);
+        assert_eq!(stat_to_modifier(22), 6);
+        assert_eq!(stat_to_modifier(23), 6);
+        assert_eq!(stat_to_modifier(24), 7);
+        assert_eq!(stat_to_modifier(25), 7);
+        assert_eq!(stat_to_modifier(26), 8);
+        assert_eq!(stat_to_modifier(27), 8);
+        assert_eq!(stat_to_modifier(28), 9);
+        assert_eq!(stat_to_modifier(29), 9);
+        assert_eq!(stat_to_modifier(30), 10);
+    }
 }
 
 pub fn proficiency_bonus(level: i32) -> i32 {
@@ -68,8 +108,12 @@ impl Stat {
     }
 
     pub fn set_value(&mut self, value: i32) {
-        self.value = value;
-        self.modifier = stat_to_modifier(value);
+        if value < 1 {
+            self.value = 1;
+        } else {
+            self.value = value;
+            self.modifier = stat_to_modifier(value);
+        }
     }
 
     pub fn get_name(&self) -> String {
@@ -83,15 +127,21 @@ impl Stat {
     pub fn get_modifier(&self) -> i32 {
         self.modifier
     }
+
+    pub fn set_save_proficiency(&mut self, proficiency: bool) {
+        self.saving_throw_proficiency = proficiency;
+    }
+
+    pub fn get_saving_throw_proficiency(&self) -> bool {
+        self.saving_throw_proficiency
+    }
     
     pub fn add_one(&mut self) {
-        self.value += 1;
-        self.modifier = stat_to_modifier(self.value);
+        self.set_value(self.value + 1)
     }
 
     pub fn subtract_one(&mut self) {
-        self.value -= 1;
-        self.modifier = stat_to_modifier(self.value);
+        self.set_value(self.value - 1)
     }
 }
 
@@ -132,7 +182,7 @@ impl Stats {
         test_values
     }
 
-    pub fn get_stat(&mut self, stat_type: StatType) -> &mut Stat {
+    pub fn get_stat_mut(&mut self, stat_type: StatType) -> &mut Stat {
         match stat_type {
             StatType::Strength => &mut self.strength,
             StatType::Dexterity => &mut self.dexterity,
@@ -143,59 +193,35 @@ impl Stats {
         }
     }
 
-    pub fn get_stat_value(&self, stat_type: StatType) -> i32 {
+    pub fn get_stat(&self, stat_type: StatType) -> &Stat {
         match stat_type {
-            StatType::Strength => self.strength.value,
-            StatType::Dexterity => self.dexterity.value,
-            StatType::Constitution => self.constitution.value,
-            StatType::Intelligence => self.intelligence.value,
-            StatType::Wisdom => self.wisdom.value,
-            StatType::Charisma => self.charisma.value,
+            StatType::Strength => &self.strength,
+            StatType::Dexterity => &self.dexterity,
+            StatType::Constitution => &self.constitution,
+            StatType::Intelligence => &self.intelligence,
+            StatType::Wisdom => &self.wisdom,
+            StatType::Charisma => &self.charisma,
         }
+    }
+
+    pub fn get_stat_value(&self, stat_type: StatType) -> i32 {
+        self.get_stat(stat_type).get_value()
     }
 
     pub fn get_stat_modifier(&self, stat_type: StatType) -> i32 {
-        match stat_type {
-            StatType::Strength => self.strength.modifier,
-            StatType::Dexterity => self.dexterity.modifier,
-            StatType::Constitution => self.constitution.modifier,
-            StatType::Intelligence => self.intelligence.modifier,
-            StatType::Wisdom => self.wisdom.modifier,
-            StatType::Charisma => self.charisma.modifier,
-        }
+        self.get_stat(stat_type).get_modifier()
     }
 
     pub fn get_stat_saving_throw_proficiency(&self, stat_type: StatType) -> bool {
-        match stat_type {
-            StatType::Strength => self.strength.saving_throw_proficiency,
-            StatType::Dexterity => self.dexterity.saving_throw_proficiency,
-            StatType::Constitution => self.constitution.saving_throw_proficiency,
-            StatType::Intelligence => self.intelligence.saving_throw_proficiency,
-            StatType::Wisdom => self.wisdom.saving_throw_proficiency,
-            StatType::Charisma => self.charisma.saving_throw_proficiency,
-        }
+        self.get_stat(stat_type).get_saving_throw_proficiency()
     }
 
     pub fn set_save_proficiency(&mut self, stat_type: StatType, proficiency: bool) {
-        match stat_type {
-            StatType::Strength => self.strength.saving_throw_proficiency = proficiency,
-            StatType::Dexterity => self.dexterity.saving_throw_proficiency = proficiency,
-            StatType::Constitution => self.constitution.saving_throw_proficiency = proficiency,
-            StatType::Intelligence => self.intelligence.saving_throw_proficiency = proficiency,
-            StatType::Wisdom => self.wisdom.saving_throw_proficiency = proficiency,
-            StatType::Charisma => self.charisma.saving_throw_proficiency = proficiency,
-        }
+        self.get_stat_mut(stat_type).set_save_proficiency(proficiency)
     }
 
     pub fn set_stat_value(&mut self, stat_type: StatType, value: i32) {
-        match stat_type {
-            StatType::Strength => self.strength.set_value(value),
-            StatType::Dexterity => self.dexterity.set_value(value),
-            StatType::Constitution => self.constitution.set_value(value),
-            StatType::Intelligence => self.intelligence.set_value(value),
-            StatType::Wisdom => self.wisdom.set_value(value),
-            StatType::Charisma => self.charisma.set_value(value),
-        }
+        self.get_stat_mut(stat_type).set_value(value)
     }
 
     pub fn update_modifiers(&mut self) {
