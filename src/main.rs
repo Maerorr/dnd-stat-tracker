@@ -5,6 +5,8 @@ mod dnd_utils;
 mod character;
 mod ui_widgets;
 
+mod dnd_logic;
+
 use app::StatTracker;
 
 fn main() -> Result<(), eframe::Error> {

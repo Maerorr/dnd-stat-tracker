@@ -12,3 +12,4 @@ epaint = "0.25"
 egui_extras = "0.25"
 strum = "0.25"
 strum_macros = "0.25"
+serde = { version = "1", optional = true, features = ["derive"] }

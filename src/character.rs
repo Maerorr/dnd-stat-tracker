@@ -1,4 +1,4 @@
-use crate::dnd_utils::{stat_to_modifier, Stat, Dice, DeathSaves, Class, Stats, Skills, proficiency_bonus};
+use crate::dnd_logic::prelude::*;
 
 pub struct Character {
     pub name: String,
@@ -52,12 +52,54 @@ impl Character {
     pub fn test_character() -> Self {
         let mut character = Self::default();
         character.name = String::from("test character");
-        character.level = 5;
+        character.set_level(5);
         character.class = Class::Barbarian;
         character.stats = Stats::test_stats();
         character.skills = Skills::test_skills();
         character.proficiency_bonus = proficiency_bonus(character.level);
         character
+    }
+
+    pub fn add_level(&mut self) {
+        if self.level >= 20 {
+            return;
+        }
+        self.level += 1;
+        self.proficiency_bonus = proficiency_bonus(self.level);
+        self.experience = exp_needed_to_lvl(self.level);
+    }
+
+    pub fn subtract_level(&mut self) {
+        if self.level <= 1 {
+            return;
+        }
+        self.level -= 1;
+        self.proficiency_bonus = proficiency_bonus(self.level);
+        self.experience = exp_needed_to_lvl(self.level);
+    }
+
+    pub fn get_class(&mut self) -> &mut Class {
+        &mut self.class
+    }
+
+    pub fn set_experience(&mut self, exp: i32) {
+        if exp < 0 {
+            self.experience = 0;
+            return;
+        }
+        self.experience = exp;
+        self.level = exp_to_lvl(exp);
+        self.proficiency_bonus = proficiency_bonus(self.level);
+    }
+
+    pub fn set_level(&mut self, lvl: i32) {
+        if lvl < 1 {
+            self.level = 1;
+            return;
+        }
+        self.level = lvl;
+        self.experience = exp_needed_to_lvl(lvl);
+        self.proficiency_bonus = proficiency_bonus(self.level);
     }
 }
 

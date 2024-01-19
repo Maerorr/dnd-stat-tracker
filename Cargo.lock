@@ -793,6 +793,7 @@ dependencies = [
  "egui",
  "egui_extras",
  "epaint",
+ "serde",
  "strum",
  "strum_macros",
 ]

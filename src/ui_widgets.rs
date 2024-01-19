@@ -2,14 +2,23 @@ use egui::{Sense, RichText};
 use epaint::{Vec2, Stroke, Pos2};
 use strum::IntoEnumIterator;
 
-use crate::{dnd_utils::{Stat, StatType, SkillType}, character::Character, app::EDIT_MODE};
+use crate::{character::Character, app::EDIT_MODE, dnd_logic::prelude::*};
 
-pub struct UiWidgets;
+pub struct UiWidgets {
+    exp_change: String
+}
 
+impl Default for UiWidgets {
+    fn default() -> Self {
+        Self {
+            exp_change: String::new(),
+        }
+    }
+}
 
 impl UiWidgets {
     pub fn single_stat_widget(&self, ui: &mut egui::Ui, stat: &mut Stat, i: usize) {
-        egui::Grid::new(format!("stat_{}", i))
+        egui::Grid::new(format!("stat_{}{}", stat.get_name(), if unsafe {EDIT_MODE} { "edit" } else { "" }))
         .min_col_width(10.0)
         .max_col_width(100.0)
         .show(ui, |ui| {
@@ -21,39 +30,94 @@ impl UiWidgets {
                 ui.label(format!("{} ({})", stat.get_value(), stat.get_modifier()));
             });
             if unsafe { EDIT_MODE } {
-                if ui.button("-").clicked() {
+                let sub_resp = ui.add(egui::Button::new("-"));
+                if sub_resp.clicked() {
                     stat.subtract_one();
                 }
-                if ui.button("+").clicked() {
+
+                let add_resp = ui.add(egui::Button::new("+"));
+                if add_resp.clicked() {
                     stat.add_one();
                 }
             }
-            
         });
     }
 
-    pub fn basic_character_info(&self, ui: &mut egui::Ui, character: &mut Character) {
+    pub fn basic_character_info(&mut self, ui: &mut egui::Ui, character: &mut Character) {
         ui.horizontal_centered(|ui| {
 
             draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Name:");
-            ui.label(&character.name);
+            if unsafe { EDIT_MODE } {
+                ui.text_edit_singleline(&mut character.name);
+            } else {
+                ui.label(&character.name);
+            }
 
             draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Level:");
             ui.label(&character.level.to_string());
+            if unsafe { EDIT_MODE } {
+                let sub_resp = ui.add(egui::Button::new("-"));
+                if sub_resp.clicked() {
+                    character.subtract_level();
+                }
+
+                let add_resp = ui.add(egui::Button::new("+"));
+                if add_resp.clicked() {
+                    character.add_level();
+                }
+            }
 
             draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Class:");
-            ui.label(&character.class.get_name());
+            if unsafe {EDIT_MODE} {
+                // add combo box with all classes
+                egui::ComboBox::new("class_combo", "Class")
+                .selected_text(character.class.get_name())
+                .show_ui(ui, |ui| {
+                    ui.style_mut().wrap = Some(false);
+                    ui.set_min_width(60.0);
+                    ui.selectable_value(character.get_class(), Class::Barbarian, "Barbarian");
+                    ui.selectable_value(character.get_class(), Class::Bard, "Bard");
+                    ui.selectable_value(character.get_class(), Class::Cleric, "Cleric");
+                    ui.selectable_value(character.get_class(), Class::Druid, "Druid");
+                    ui.selectable_value(character.get_class(), Class::Fighter, "Fighter");
+                    ui.selectable_value(character.get_class(), Class::Monk, "Monk");
+                    ui.selectable_value(character.get_class(), Class::Paladin, "Paladin");
+                    ui.selectable_value(character.get_class(), Class::Ranger, "Ranger");
+                    ui.selectable_value(character.get_class(), Class::Rogue, "Rogue");
+                    ui.selectable_value(character.get_class(), Class::Sorcerer, "Sorcerer");
+                    ui.selectable_value(character.get_class(), Class::Warlock, "Warlock");
+                    ui.selectable_value(character.get_class(), Class::Wizard, "Wizard");
+                });
+            } else {
+                ui.label(character.class.get_name());
+            }
 
             draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Experience:");
             ui.label(&character.experience.to_string());
+
+            if unsafe { EDIT_MODE } {
+                ui.text_edit_singleline(&mut self.exp_change);
+                if ui.button("Add").on_hover_text("Add experience to character").clicked() {
+                    if let Ok(exp) = self.exp_change.parse::<i32>() {
+                        let new_exp = exp + character.experience;
+                        character.set_experience(new_exp)
+                    }
+                };
+                if ui.button("Subtract").on_hover_text("Subtract experience from character").clicked() {
+                    if let Ok(exp) = self.exp_change.parse::<i32>() {
+                        let new_exp = character.experience - exp;
+                        character.set_experience(new_exp)
+                    }
+                };
+            }
 
             draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
         });
@@ -66,12 +130,23 @@ impl UiWidgets {
                     
                     // paint a filled circle if yes, empty circle if no
                     let (rect, _response) = ui.allocate_at_least(Vec2::new(10.0, 10.0), Sense::hover());
-                    if character.stats.get_stat_saving_throw_proficiency(stat) {
-                        // draw a filled circle using epaint
-                        ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                    let prof = character.stats.get_stat_saving_throw_proficiency(stat);
+
+                    if unsafe {EDIT_MODE} {
+                        if prof {
+                            
+                        } else {
+                            
+                        }
                     } else {
-                        ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
+                        if prof {
+                            // draw a filled circle using epaint
+                            ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                        } else {
+                            ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
+                        }
                     }
+
                     ui.label(stat.get_name());
                     ui.end_row();
             }

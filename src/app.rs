@@ -3,7 +3,7 @@ use egui_extras::StripBuilder;
 use epaint::{Vec2, Rect, Pos2, Stroke};
 use strum::IntoEnumIterator;
 
-use crate::{character::Character, dnd_utils::{Stats, StatType}, ui_widgets::{UiWidgets, self, centered_label, centered_heading}};
+use crate::{character::Character, ui_widgets::{UiWidgets, self, centered_label, centered_heading}, dnd_logic::stat_type::StatType};
 
 //create global variable EDIT_MODE
 
@@ -37,6 +37,7 @@ pub struct StatTracker {
     characters: Vec<Character>,
     current_character: usize, // index of current character in characters
     ui_widgets: UiWidgets,
+    first_frame: bool,
 }
 
 impl Default for StatTracker {
@@ -48,7 +49,8 @@ impl Default for StatTracker {
             state: AppState::StatTracker,
             characters: vec![def_char],
             current_character: 0,
-            ui_widgets: UiWidgets,
+            ui_widgets: UiWidgets::default(),
+            first_frame: true,
         }
     }
 }
@@ -97,6 +99,7 @@ impl eframe::App for StatTracker {
                                         if edit_button_response.clicked() {
                                             self.state = AppState::StatTrackerEdit;
                                             unsafe { EDIT_MODE = true };
+                                            self.first_frame = true;
                                         }
                                 });
 
@@ -160,6 +163,7 @@ impl eframe::App for StatTracker {
                                         if edit_button_response.clicked() {
                                             self.state = AppState::StatTracker;
                                             unsafe { EDIT_MODE = false };
+                                            self.first_frame = true;
                                         }
                                 });
 
@@ -170,7 +174,7 @@ impl eframe::App for StatTracker {
                         
                     });
 
-                    let side_panel = egui::SidePanel::left("stat_panel")
+                    egui::SidePanel::left("stat_panel")
                     .min_width(350.0)
                     .resizable(true)
                     .show_inside(ui, |ui| {
@@ -215,12 +219,13 @@ impl StatTracker {
             state: AppState::StatTracker,
             characters: vec![def_char],
             current_character: 0,
-            ui_widgets: UiWidgets,
+            ui_widgets: UiWidgets::default(),
+            first_frame: true,
         }
     }
 
     pub fn stats_ui(&mut self, ui: &mut egui::Ui) {
-        egui::Grid::new("stats_grid").show(ui, |ui| {
+        egui::Grid::new(format!("{}{}", "stats_grid", unsafe {EDIT_MODE.to_string()})).show(ui, |ui| {
             centered_heading(ui, "Stats");
             ui.end_row();
             for (i, stat) in StatType::iter().enumerate() {
