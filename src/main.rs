@@ -1,9 +1,8 @@
 use eframe::egui;
 
 mod app;
-mod dnd_utils;
-mod character;
 mod ui_widgets;
+mod ui;
 
 mod dnd_logic;
 
@@ -15,7 +14,7 @@ fn main() -> Result<(), eframe::Error> {
         ..Default::default()
     };
     eframe::run_native(
-        "My egui App",
+        "Maeror's D&D Stat Tracker",
         options,
         Box::new(|cc| {
             // This gives us image support:

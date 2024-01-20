@@ -6,3 +6,4 @@ pub use super::skill_type::*;
 pub use super::stat_type::*;
 pub use super::stats::*;
 pub use super::utils::*;
+pub use super::character::*;

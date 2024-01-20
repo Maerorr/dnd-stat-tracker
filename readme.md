@@ -10,3 +10,4 @@ TODO:
 - [ ] - equipement as text
 - [ ] - weapons and hit/dmg modifiers
 - [ ] - spell list + spell slots
+- [ ] - local character saves

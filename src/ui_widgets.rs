@@ -2,7 +2,7 @@ use egui::{Sense, RichText};
 use epaint::{Vec2, Stroke, Pos2, Rounding};
 use strum::IntoEnumIterator;
 
-use crate::{character::Character, app::EDIT_MODE, dnd_logic::prelude::*};
+use crate::{app::EDIT_MODE, dnd_logic::prelude::*};
 
 pub struct UiWidgets {
     exp_change: String
@@ -46,7 +46,7 @@ impl UiWidgets {
     pub fn basic_character_info(&mut self, ui: &mut egui::Ui, character: &mut Character) {
         ui.horizontal_centered(|ui| {
 
-            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+            draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Name:");
             if unsafe { EDIT_MODE } {
@@ -55,7 +55,7 @@ impl UiWidgets {
                 ui.label(&character.name);
             }
 
-            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+            draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Level:");
             ui.label(&character.level.to_string());
@@ -71,7 +71,7 @@ impl UiWidgets {
                 }
             }
 
-            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+            draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Class:");
             if unsafe {EDIT_MODE} {
@@ -98,7 +98,7 @@ impl UiWidgets {
                 ui.label(character.class.get_name());
             }
 
-            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+            draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
             ui.label("Experience:");
             ui.label(&character.experience.to_string());
@@ -119,7 +119,7 @@ impl UiWidgets {
                 };
             }
 
-            draw_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+            draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
         });
     }
 
@@ -199,6 +199,84 @@ impl UiWidgets {
             }
         });
     }
+
+    pub fn display_health_stats(&self, ui: &mut egui::Ui, character: &mut Character) {
+        egui::Grid::new(format!("{}{}", "middle_panel_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+        .min_col_width(250.0)
+        .show(ui, |ui| {
+            egui::Grid::new(format!("{}{}", "health_stats_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+            .min_col_width(80.0)
+            .show(ui, |ui| {
+                if unsafe {EDIT_MODE} {
+                    ui.vertical_centered(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(character.armor_class.to_string());
+                            if ui.button("-").clicked() {
+                                character.subtract_one_ac();
+                            }
+                            if ui.button("+").clicked() {
+                                character.add_one_ac();
+                            }
+                        });
+                        
+                        ui.label(RichText::new("Armor Class").size(14.0));
+                    });
+                    ui.vertical_centered(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.label("DEX");
+                            let init = character.initiative_bonus;
+                            let init_sign = {
+                                if init >= 0 {
+                                    "+"
+                                } else {
+                                    "-"
+                                }
+                            };
+                            ui.label(format!("{}{}", init_sign, init));
+                            if ui.button("-").clicked() {
+                                character.subtract_one_initiative();
+                            }
+                            if ui.button("+").clicked() {
+                                character.add_one_initiative();
+                            }
+                        });
+                        
+                        ui.label(RichText::new("Initiative").size(14.0));
+                    });
+                    ui.vertical_centered(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(format!("{}{}", character.speed.to_string(), "ft."));
+                            if ui.button("-").clicked() {
+                                character.subtract_5_speed();
+                            }
+                            if ui.button("+").clicked() {
+                                character.add_5_speed();
+                            }
+                        });
+                        ui.label(RichText::new("Speed").size(14.0));
+                    });
+
+                } else {
+                    ui.vertical_centered(|ui| {
+                        ui.label(character.armor_class.to_string());
+                        ui.label(RichText::new("Armor Class").size(14.0));
+                    });
+                    ui.vertical_centered(|ui| {
+                        let init = character.stats.get_stat(StatType::Dexterity).get_modifier() + character.initiative_bonus;
+                        let init_sign = if init > 0 { "+" } else { "" };
+                        ui.label(format!("{}{}", init_sign, init));
+                        ui.label(RichText::new("Initiative").size(14.0));
+                    });
+                    ui.vertical_centered(|ui| {
+                        ui.label(format!("{}{}", character.speed.to_string(), "ft."));
+                        ui.label(RichText::new("Speed").size(14.0));
+                    });
+                }
+            });
+            ui.end_row();
+            draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+        });
+    }
 }
 
 pub fn centered_label(ui: &mut egui::Ui, text: &str) {
@@ -213,7 +291,7 @@ pub fn centered_heading(ui: &mut egui::Ui, text: &str) {
     });
 }
 
-pub fn draw_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui::Color32) {
+pub fn draw_vertical_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui::Color32) {
     let (rect, _response) = ui.allocate_at_least(vec2, Sense::hover());
 
     ui.painter().line_segment(
@@ -225,25 +303,14 @@ pub fn draw_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui::Color32) {
     );
 }
 
-pub fn proficiency_edit(ui: &mut egui::Ui, on: &mut bool) -> egui::Response {
-    let (rect, mut response) = ui.allocate_at_least(Vec2::new(12.0, 12.0), Sense::click());
+pub fn draw_horizontal_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui::Color32) {
+    let (rect, _response) = ui.allocate_at_least(vec2, Sense::hover());
 
-    response.widget_info(|| egui::WidgetInfo::selected(egui::WidgetType::Checkbox, *on, ""));
-    if response.clicked() {
-        *on = !*on;
-        response.mark_changed();
-    }
-    let mut rounding = Rounding::default();
-    rounding.at_least(4.0);
-    if *on {
-        ui.painter().rect_filled(rect, rounding, egui::Color32::from_rgb(255, 255, 255));
-    } else {
-        ui.painter().rect_stroke(rect, rounding, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
-    }
-
-    response
-}
-
-pub fn proficiency_edit_switch(on: &mut bool) -> impl egui::Widget + '_ {
-    move |ui: &mut egui::Ui| proficiency_edit(ui, on)
+    ui.painter().line_segment(
+        [Pos2::new(rect.left(), rect.top()), Pos2::new(rect.right(), rect.top())], 
+        Stroke::new(
+            1.0, 
+            color
+        )
+    );
 }

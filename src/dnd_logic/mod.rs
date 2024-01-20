@@ -6,5 +6,6 @@ pub mod class;
 pub mod skill_type;
 pub mod skill;
 pub mod death_saves;
+pub mod character;
 
 pub mod prelude;

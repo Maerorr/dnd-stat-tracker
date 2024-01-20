@@ -101,5 +101,36 @@ impl Character {
         self.experience = exp_needed_to_lvl(lvl);
         self.proficiency_bonus = proficiency_bonus(self.level);
     }
+
+    pub fn add_one_ac(&mut self) {
+        self.armor_class += 1;
+    }
+
+    pub fn subtract_one_ac(&mut self) {
+        if self.armor_class <= 0 {
+            return;
+        }
+        self.armor_class -= 1;
+    }
+
+    pub fn add_one_initiative(&mut self) {
+        self.initiative_bonus += 1;
+    }
+
+    pub fn subtract_one_initiative(&mut self) {
+        self.initiative_bonus -= 1;
+    }
+
+    pub fn add_5_speed(&mut self) {
+        self.speed += 5;
+    }
+
+    pub fn subtract_5_speed(&mut self) {
+        if self.speed <= 5 {
+            self.speed = 0;
+            return;
+        }
+        self.speed -= 5;
+    }
 }
 
