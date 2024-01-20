@@ -6,7 +6,7 @@ TODO:
 - [X] - character basic info (name, class, exp) + editable
 - [X] - ability scores + editable
 - [+/-] - saving throws and skill modifiers, proficiencies and expertise + editable
-- [n] - hitpoints, AC, temporary hitpoints, hit dice etc. + editable
-- [n] - equipement as text
-- [n] - weapons and hit/dmg modifiers
-- [n] - spell list + spell slots
+- [] - hitpoints, AC, temporary hitpoints, hit dice etc. + editable
+- [] - equipement as text
+- [] - weapons and hit/dmg modifiers
+- [] - spell list + spell slots
