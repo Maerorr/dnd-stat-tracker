@@ -1,17 +1,26 @@
-use egui::{Sense, RichText};
+use egui::{Sense, RichText, style::Spacing};
 use epaint::{Vec2, Stroke, Pos2, Rounding};
 use strum::IntoEnumIterator;
 
 use crate::{app::EDIT_MODE, dnd_logic::prelude::*};
 
 pub struct UiWidgets {
-    exp_change: String
+    exp_change: String,
+    curr_hp_change: String,
+    max_hp_change: String,
+    temp_hp_change: String,
+    damage_taken: String,
+
 }
 
 impl Default for UiWidgets {
     fn default() -> Self {
         Self {
             exp_change: String::new(),
+            curr_hp_change: String::new(),
+            max_hp_change: String::new(),
+            temp_hp_change: String::new(),
+            damage_taken: String::new(),
         }
     }
 }
@@ -200,81 +209,190 @@ impl UiWidgets {
         });
     }
 
-    pub fn display_health_stats(&self, ui: &mut egui::Ui, character: &mut Character) {
-        egui::Grid::new(format!("{}{}", "middle_panel_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
-        .min_col_width(250.0)
-        .show(ui, |ui| {
-            egui::Grid::new(format!("{}{}", "health_stats_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
-            .min_col_width(80.0)
-            .show(ui, |ui| {
-                if unsafe {EDIT_MODE} {
-                    ui.vertical_centered(|ui| {
-                        ui.horizontal(|ui| {
-                            ui.label(character.armor_class.to_string());
-                            if ui.button("-").clicked() {
-                                character.subtract_one_ac();
-                            }
-                            if ui.button("+").clicked() {
-                                character.add_one_ac();
-                            }
-                        });
-                        
-                        ui.label(RichText::new("Armor Class").size(14.0));
-                    });
-                    ui.vertical_centered(|ui| {
-                        ui.horizontal(|ui| {
-                            ui.label("DEX");
-                            let init = character.initiative_bonus;
-                            let init_sign = {
-                                if init >= 0 {
-                                    "+"
-                                } else {
-                                    "-"
-                                }
-                            };
-                            ui.label(format!("{}{}", init_sign, init));
-                            if ui.button("-").clicked() {
-                                character.subtract_one_initiative();
-                            }
-                            if ui.button("+").clicked() {
-                                character.add_one_initiative();
-                            }
-                        });
-                        
-                        ui.label(RichText::new("Initiative").size(14.0));
-                    });
-                    ui.vertical_centered(|ui| {
-                        ui.horizontal(|ui| {
-                            ui.label(format!("{}{}", character.speed.to_string(), "ft."));
-                            if ui.button("-").clicked() {
-                                character.subtract_5_speed();
-                            }
-                            if ui.button("+").clicked() {
-                                character.add_5_speed();
-                            }
-                        });
-                        ui.label(RichText::new("Speed").size(14.0));
-                    });
+    pub fn display_health_stats(&mut self, ui: &mut egui::Ui, character: &mut Character) {
+        ui.vertical(|ui| {
+            if unsafe {EDIT_MODE} {
+                ui.horizontal(|ui| {
+                    ui.columns(3, |columns| {
 
-                } else {
-                    ui.vertical_centered(|ui| {
+                        columns[0].vertical_centered(|ui| {
+                            egui::Grid::new(format!("{}{}", "ac_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+                            .min_col_width(10.0)
+                            .show(ui, |ui| {
+                                ui.add_space(20.0);
+                                if ui.button("-").clicked() {
+                                    character.subtract_one_ac();
+                                }
+                                ui.label(character.armor_class.to_string());
+                                if ui.button("+").clicked() {
+                                    character.add_one_ac();
+                                }
+                                ui.add_space(20.0);
+                            });
+                        });
+
+                        columns[1].vertical_centered(|ui| {
+                            egui::Grid::new(format!("{}{}", "initiative_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+                            .min_col_width(10.0)
+                            .show(ui, |ui| {
+                                ui.add_space(20.0);
+                                if ui.button("-").clicked() {
+                                    character.subtract_one_initiative();
+                                }
+                                let init = character.stats.get_stat(StatType::Dexterity).get_modifier() + character.initiative_bonus;
+                                let init_sign = if init > 0 { "+" } else { "" };
+                                ui.label(format!("{}{}", init_sign, init));
+                                if ui.button("+").clicked() {
+                                    character.add_one_initiative();
+                                }
+                                ui.add_space(20.0);
+                            });
+                        });
+                        columns[2].vertical_centered(|ui| {
+                            egui::Grid::new(format!("{}{}", "speed_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+                            .min_col_width(10.0)
+                            .show(ui, |ui| {
+                                ui.add_space(20.0);
+                                if ui.button("-").clicked() {
+                                    character.subtract_5_speed();
+                                }
+                                ui.label(format!("{}{}", character.speed.to_string(), "ft."));
+                                if ui.button("+").clicked() {
+                                    character.add_5_speed();
+                                }
+                            });
+                        });
+                    });
+                });
+
+                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+            
+                egui::Grid::new(format!("{}{}", "hp_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+                .min_col_width(50.0)
+                .show(ui, |ui| {
+                        let max_hp_no_change = character.maximum_hit_points;
+                        let curr_hp_no_change = character.current_hit_points;
+                        let temp_hp_no_change = character.temporary_hit_points;
+                        self.max_hp_change = character.maximum_hit_points.to_string();
+                        self.curr_hp_change = character.current_hit_points.to_string();
+                        self.temp_hp_change = character.temporary_hit_points.to_string();
+                        ui.label(RichText::new("HP Max: ").size(14.0));
+                        ui.text_edit_singleline(&mut self.max_hp_change);
+
+                        ui.end_row();
+
+                        ui.label(RichText::new("HP Current: ").size(24.0));
+                        ui.text_edit_singleline(&mut self.curr_hp_change);
+
+                        ui.end_row();
+                        ui.label(RichText::new("HP Temp: ").size(24.0));
+                        ui.text_edit_singleline(&mut self.temp_hp_change);
+
+                        // set the values to character, if parsing fails, don't change the value
+                        if let Ok(max_hp) = self.max_hp_change.parse::<i32>() {
+                            if max_hp != max_hp_no_change {
+                                character.set_maximum_hit_points(max_hp);
+                            }
+                        }
+                        if let Ok(curr_hp) = self.curr_hp_change.parse::<i32>() {
+                            if curr_hp != curr_hp_no_change {
+                                character.set_current_hit_points(curr_hp);
+                            }
+                        }
+                        if let Ok(temp_hp) = self.temp_hp_change.parse::<i32>() {
+                            if temp_hp != temp_hp_no_change {
+                                character.set_temporary_hit_points(temp_hp);
+                            }
+                        }
+                        ui.end_row();
+                });
+
+                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+                
+            } else {
+                ui.columns(3, |columns| {
+                    columns[0].set_width(80.0);
+                    columns[0].vertical_centered(|ui| {
                         ui.label(character.armor_class.to_string());
                         ui.label(RichText::new("Armor Class").size(14.0));
                     });
-                    ui.vertical_centered(|ui| {
+                    columns[1].set_width(80.0);
+                    columns[1].vertical_centered(|ui| {
                         let init = character.stats.get_stat(StatType::Dexterity).get_modifier() + character.initiative_bonus;
                         let init_sign = if init > 0 { "+" } else { "" };
                         ui.label(format!("{}{}", init_sign, init));
                         ui.label(RichText::new("Initiative").size(14.0));
                     });
-                    ui.vertical_centered(|ui| {
+                    columns[2].set_width(80.0);
+                    columns[2].vertical_centered(|ui| {
                         ui.label(format!("{}{}", character.speed.to_string(), "ft."));
                         ui.label(RichText::new("Speed").size(14.0));
                     });
-                }
-            });
-            ui.end_row();
-            draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+                });
+
+                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+            
+                egui::Grid::new(format!("{}{}", "hp_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+                .min_col_width(50.0)
+                .show(ui, |ui| {
+                    if unsafe {EDIT_MODE} {
+                    } else {
+                        ui.label(RichText::new("HP Max: ").size(14.0));
+                        ui.label(RichText::new(character.maximum_hit_points.to_string()).size(14.0));
+                        ui.end_row();
+                        ui.label(RichText::new("HP Current: ").size(24.0));
+                        ui.label(RichText::new(character.current_hit_points.to_string()).size(24.0));
+                        ui.text_edit_singleline(&mut self.damage_taken);
+                        if ui.button("Take Damage").clicked() {
+                            if let Ok(damage) = self.damage_taken.parse::<i32>() {
+                                character.take_damage(damage);
+                            }
+                        }
+                        ui.end_row();
+                        ui.label(RichText::new("HP Temp: ").size(24.0));
+                        ui.label(RichText::new(character.temporary_hit_points.to_string()).size(24.0));
+                        ui.end_row();
+                    }
+                });
+                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+
+                ui.horizontal(|ui| {
+                    ui.vertical(|ui| {
+                        ui.label(RichText::new("Hit Dice Total"));
+                        ui.end_row();
+                        ui.label(RichText::new(character.hit_dice_total.to_string()));
+                    });
+                    ui.add_space(100.0);
+                    ui.vertical(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new("Successes").size(14.0));
+                            let successes = character.death_saves.successes;
+                            for _ in 0..successes {
+                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                            }
+                            for _ in 0..(3 - successes) {
+                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                            }
+                        });
+
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new("Failures").size(14.0));
+                            ui.add_space(15.0);
+                            let failures = character.death_saves.failures;
+                            for _ in 0..failures {
+                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                            }
+                            for _ in 0..(3 - failures) {
+                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                            }
+                        });
+                    });
+                });
+                
+            }
+            
+            
+            
         });
     }
 }
@@ -313,4 +431,16 @@ pub fn draw_horizontal_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui:
             color
         )
     );
+}
+
+pub fn draw_circle_stroke(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egui::Color32) {
+    let (rect, _response) = ui.allocate_at_least(vec2, Sense::hover());
+
+    ui.painter().circle_stroke(rect.center(), radius, Stroke::new(1.0, color));
+}
+
+pub fn draw_circle_filled(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egui::Color32) {
+    let (rect, _response) = ui.allocate_at_least(vec2, Sense::hover());
+
+    ui.painter().circle_filled(rect.center(), radius, color);
 }

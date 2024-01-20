@@ -3,6 +3,12 @@ pub struct Dice {
     pub count: i32,
 }
 
+impl ToString for Dice {
+    fn to_string(&self) -> String {
+        format!("{}d{}", self.count, self.sides)
+    }
+}
+
 impl Dice {
     pub fn new(sides: i32, count: i32) -> Self {
         Self { sides, count }

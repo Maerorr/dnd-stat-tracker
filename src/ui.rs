@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use egui::{Context, Ui, Align, Sense};
 use epaint::{Vec2, Pos2, Stroke};
 
@@ -47,9 +49,9 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
             
         });
 
-        let side_panel = egui::SidePanel::left("stat_panel")
+        let side_panel = egui::SidePanel::left(format!("{}{}", "side_panel", unsafe {EDIT_MODE.to_string()}))
         .min_width(350.0)
-        .resizable(true)
+        .resizable(false)
         .show_inside(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.add_space(15.0);
