@@ -1,5 +1,5 @@
 use egui::{Sense, RichText};
-use epaint::{Vec2, Stroke, Pos2};
+use epaint::{Vec2, Stroke, Pos2, Rounding};
 use strum::IntoEnumIterator;
 
 use crate::{character::Character, app::EDIT_MODE, dnd_logic::prelude::*};
@@ -124,28 +124,31 @@ impl UiWidgets {
     }
 
     pub fn display_saving_throws_proficiencies(&self, ui: &mut egui::Ui, character: &mut Character) {
-        egui::Grid::new("saving_throws_grid")
+        egui::Grid::new(format!("{}{}", "saving_throws_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+        .min_col_width(1.0)
         .show(ui, |ui| {
             for stat in StatType::iter() {
                     
                     // paint a filled circle if yes, empty circle if no
                     let (rect, _response) = ui.allocate_at_least(Vec2::new(10.0, 10.0), Sense::hover());
-                    let prof = character.stats.get_stat_saving_throw_proficiency(stat);
+                    let mut prof = character.stats.get_stat_saving_throw_proficiency(stat);
 
                     if unsafe {EDIT_MODE} {
-                        if prof {
-                            
-                        } else {
-                            
-                        }
+                        ui.checkbox(&mut prof, " ");
+
+                        character.stats.set_save_proficiency(stat, prof);
                     } else {
                         if prof {
-                            // draw a filled circle using epaint
                             ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
                         } else {
                             ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
                         }
                     }
+
+                    let bonus = character.proficiency_bonus * prof as i32 + character.stats.get_stat(stat).get_modifier();
+                    let sign = if bonus > 0 { "+" } else { "" };
+
+                    ui.label(RichText::new(format!("({}{})", sign, bonus)));
 
                     ui.label(stat.get_name());
                     ui.end_row();
@@ -155,7 +158,7 @@ impl UiWidgets {
 
     pub fn display_proficiencies(&self, ui: &mut egui::Ui, character: &mut Character) {
         egui::Grid::new("proficiencies_grid")
-        .min_col_width(15.0)
+        .min_col_width(1.0)
         .show(ui, |ui| {
             for skill in SkillType::iter() {
                 
@@ -163,17 +166,22 @@ impl UiWidgets {
                 let (rect, _response) = ui.allocate_at_least(Vec2::new(10.0, 10.0), Sense::hover());
 
                 // is proficient?
-                let prof = character.skills.get_skill_proficiency(skill);
+                let mut prof = character.skills.get_skill_proficiency(skill);
                 // has expertise?
                 let expert = character.skills.get_skill_expertise(skill);
                 let other_bonus = character.skills.get_skill_other_bonus(skill);
                 let skill_mod = character.stats.get_stat(skill.get_base_stat()).get_modifier();
 
                 // proficiency sombol using empty or filled circle
-                if prof {
-                    ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                if unsafe {EDIT_MODE} {
+                    ui.checkbox(&mut prof, " ");
+                    character.skills.set_skill_proficiency(skill, prof);
                 } else {
-                    ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
+                    if prof {
+                        ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                    } else {
+                        ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
+                    }
                 }
                 // calculate total bonus
                 let bonus = skill_mod + character.proficiency_bonus * prof as i32 + character.proficiency_bonus * expert as i32 + other_bonus;
@@ -215,4 +223,27 @@ pub fn draw_line_at_least(ui: &mut egui::Ui, vec2: Vec2, color: egui::Color32) {
             color
         )
     );
+}
+
+pub fn proficiency_edit(ui: &mut egui::Ui, on: &mut bool) -> egui::Response {
+    let (rect, mut response) = ui.allocate_at_least(Vec2::new(12.0, 12.0), Sense::click());
+
+    response.widget_info(|| egui::WidgetInfo::selected(egui::WidgetType::Checkbox, *on, ""));
+    if response.clicked() {
+        *on = !*on;
+        response.mark_changed();
+    }
+    let mut rounding = Rounding::default();
+    rounding.at_least(4.0);
+    if *on {
+        ui.painter().rect_filled(rect, rounding, egui::Color32::from_rgb(255, 255, 255));
+    } else {
+        ui.painter().rect_stroke(rect, rounding, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
+    }
+
+    response
+}
+
+pub fn proficiency_edit_switch(on: &mut bool) -> impl egui::Widget + '_ {
+    move |ui: &mut egui::Ui| proficiency_edit(ui, on)
 }

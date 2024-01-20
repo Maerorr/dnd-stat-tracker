@@ -205,6 +205,29 @@ impl Skills {
         }
     }
 
+    pub fn get_skill_mut(&mut self, skill_type: SkillType) -> &mut Skill {
+        match skill_type {
+            SkillType::Acrobatics => &mut self.acrobatics,
+            SkillType::AnimalHandling => &mut self.animal_handling,
+            SkillType::Arcana => &mut self.arcana,
+            SkillType::Athletics => &mut self.athletics,
+            SkillType::Deception => &mut self.deception,
+            SkillType::History => &mut self.history,
+            SkillType::Insight => &mut self.insight,
+            SkillType::Intimidation => &mut self.intimidation,
+            SkillType::Investigation => &mut self.investigation,
+            SkillType::Medicine => &mut self.medicine,
+            SkillType::Nature => &mut self.nature,
+            SkillType::Perception => &mut self.perception,
+            SkillType::Performance => &mut self.performance,
+            SkillType::Persuasion => &mut self.persuasion,
+            SkillType::Religion => &mut self.religion,
+            SkillType::SleightOfHand => &mut self.sleight_of_hand,
+            SkillType::Stealth => &mut self.stealth,
+            SkillType::Survival => &mut self.survival,
+        }
+    }
+
     pub fn get_skill_proficiency(&self, skill_type: SkillType) -> bool {
         self.get_skill(skill_type).proficiency
     }
@@ -219,5 +242,9 @@ impl Skills {
 
     pub fn get_base_stat(&self, skill_type: SkillType) -> StatType {
         self.get_skill(skill_type).base_ability
+    }
+
+    pub fn set_skill_proficiency(&mut self, skill_type: SkillType, prof: bool) {
+        self.get_skill_mut(skill_type).proficiency = prof;
     }
 }

@@ -174,7 +174,7 @@ impl eframe::App for StatTracker {
                         
                     });
 
-                    egui::SidePanel::left("stat_panel")
+                    egui::SidePanel::left(format!("{}{}", "stat_panel", unsafe {EDIT_MODE.to_string()}))
                     .min_width(350.0)
                     .resizable(true)
                     .show_inside(ui, |ui| {

@@ -142,4 +142,8 @@ impl Stats {
         self.wisdom.modifier = stat_to_modifier(self.wisdom.value);
         self.charisma.modifier = stat_to_modifier(self.charisma.value);
     }
+
+    pub fn set_proficiency(&mut self, stat_type: StatType, proficiency: bool) {
+        self.get_stat_mut(stat_type).set_save_proficiency(proficiency);
+    }
 }
