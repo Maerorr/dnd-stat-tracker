@@ -2,7 +2,7 @@ use egui::{Sense, RichText, style::Spacing};
 use epaint::{Vec2, Stroke, Pos2, Rounding};
 use strum::IntoEnumIterator;
 
-use crate::{app::EDIT_MODE, dnd_logic::prelude::*};
+use crate::{app::{EDIT_MODE, MAIN_COLOR}, dnd_logic::prelude::*};
 
 pub struct UiWidgets {
     exp_change: String,
@@ -10,7 +10,7 @@ pub struct UiWidgets {
     max_hp_change: String,
     temp_hp_change: String,
     damage_taken: String,
-
+    temp_hp: String,
 }
 
 impl Default for UiWidgets {
@@ -21,6 +21,7 @@ impl Default for UiWidgets {
             max_hp_change: String::new(),
             temp_hp_change: String::new(),
             damage_taken: String::new(),
+            temp_hp: String::new(),
         }
     }
 }
@@ -219,7 +220,7 @@ impl UiWidgets {
                             egui::Grid::new(format!("{}{}", "ac_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
                             .min_col_width(10.0)
                             .show(ui, |ui| {
-                                ui.add_space(20.0);
+                                ui.add_space(30.0);
                                 if ui.button("-").clicked() {
                                     character.subtract_one_ac();
                                 }
@@ -229,13 +230,14 @@ impl UiWidgets {
                                 }
                                 ui.add_space(20.0);
                             });
+                            ui.label(RichText::new("Armor Class").size(14.0));
                         });
 
                         columns[1].vertical_centered(|ui| {
                             egui::Grid::new(format!("{}{}", "initiative_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
                             .min_col_width(10.0)
                             .show(ui, |ui| {
-                                ui.add_space(20.0);
+                                ui.add_space(30.0);
                                 if ui.button("-").clicked() {
                                     character.subtract_one_initiative();
                                 }
@@ -245,8 +247,9 @@ impl UiWidgets {
                                 if ui.button("+").clicked() {
                                     character.add_one_initiative();
                                 }
-                                ui.add_space(20.0);
+                                //ui.add_space(20.0);
                             });
+                            ui.label(RichText::new("Initiative").size(14.0));
                         });
                         columns[2].vertical_centered(|ui| {
                             egui::Grid::new(format!("{}{}", "speed_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
@@ -261,7 +264,9 @@ impl UiWidgets {
                                     character.add_5_speed();
                                 }
                             });
+                            ui.label(RichText::new("Speed").size(14.0));
                         });
+
                     });
                 });
 
@@ -340,17 +345,33 @@ impl UiWidgets {
                         ui.label(RichText::new("HP Max: ").size(14.0));
                         ui.label(RichText::new(character.maximum_hit_points.to_string()).size(14.0));
                         ui.end_row();
-                        ui.label(RichText::new("HP Current: ").size(24.0));
-                        ui.label(RichText::new(character.current_hit_points.to_string()).size(24.0));
+                        ui.label(RichText::new("HP Current: ").size(18.0));
+                        ui.label(RichText::new(character.current_hit_points.to_string()).size(18.0));
                         ui.text_edit_singleline(&mut self.damage_taken);
                         if ui.button("Take Damage").clicked() {
                             if let Ok(damage) = self.damage_taken.parse::<i32>() {
                                 character.take_damage(damage);
                             }
                         }
+                        if ui.button("Heal").clicked() {
+                            if let Ok(heal) = self.damage_taken.parse::<i32>() {
+                                character.heal_damage(heal);
+                            }
+                        }
                         ui.end_row();
-                        ui.label(RichText::new("HP Temp: ").size(24.0));
-                        ui.label(RichText::new(character.temporary_hit_points.to_string()).size(24.0));
+                        ui.label(RichText::new("HP Temp: ").size(18.0));
+                        ui.label(RichText::new(character.temporary_hit_points.to_string()).size(18.0));
+                        ui.text_edit_singleline(&mut self.temp_hp);
+                        if ui.button("Add").clicked() {
+                            if let Ok(damage) = self.damage_taken.parse::<i32>() {
+                                character.add_temporary_hit_points(damage);
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(heal) = self.damage_taken.parse::<i32>() {
+                                character.subtract_temporary_hit_points(heal);
+                            }
+                        }
                         ui.end_row();
                     }
                 });
@@ -362,17 +383,22 @@ impl UiWidgets {
                         ui.end_row();
                         ui.label(RichText::new(character.hit_dice_total.to_string()));
                     });
-                    ui.add_space(100.0);
+                    ui.add_space(80.0);
                     ui.vertical(|ui| {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new("Successes").size(14.0));
                             let successes = character.death_saves.successes;
                             for _ in 0..successes {
-                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
                             }
                             for _ in 0..(3 - successes) {
-                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
                             }
+
+                            if ui.button("Success").clicked() {
+                                character.add_success_death_save();
+                            }
+
                         });
 
                         ui.horizontal(|ui| {
@@ -380,10 +406,20 @@ impl UiWidgets {
                             ui.add_space(15.0);
                             let failures = character.death_saves.failures;
                             for _ in 0..failures {
-                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
                             }
                             for _ in 0..(3 - failures) {
-                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
+                            }
+
+                            if ui.button("Failure").clicked() {
+                                character.add_fail_death_save();
+                            }
+                        });
+
+                        ui.vertical_centered(|ui| {
+                            if ui.button("Reset Death Saves").clicked() {
+                                character.death_saves = DeathSaves::default();
                             }
                         });
                     });

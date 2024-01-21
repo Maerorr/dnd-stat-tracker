@@ -8,6 +8,7 @@ use crate::{ui_widgets::{UiWidgets, self, centered_label, centered_heading}, dnd
 //create global variable EDIT_MODE
 
 pub static mut EDIT_MODE: bool = false;
+pub const MAIN_COLOR: egui::Color32 = egui::Color32::from_gray(150);
 
 fn configure_text_styles(ctx: &egui::Context) {
     use FontFamily::Proportional;

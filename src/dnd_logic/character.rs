@@ -157,9 +157,34 @@ impl Character {
         if damage < 0 {
             return;
         }
-        self.current_hit_points -= damage;
-        if self.current_hit_points < self.maximum_hit_points * -1 {
+        if self.temporary_hit_points > 0 {
+            self.temporary_hit_points -= damage;
+            if self.temporary_hit_points < 0 {
+                self.current_hit_points += self.temporary_hit_points;
+                self.temporary_hit_points = 0;
+            }
+            return;
+        }
+        let mut exceed = 0;
+        if self.current_hit_points < damage {
+            self.current_hit_points = 0;
+            exceed = damage - self.current_hit_points;
+        }
+        if self.current_hit_points < 0 {
+            self.current_hit_points = 0;
+        }
+        if self.current_hit_points == 0 && exceed > self.maximum_hit_points {
             self.current_hit_points = -9999;
+        }
+    }
+
+    pub fn heal_damage(&mut self, heal: i32) {
+        if heal < 0 {
+            return;
+        }
+        self.current_hit_points += heal;
+        if self.current_hit_points > self.maximum_hit_points {
+            self.current_hit_points = self.maximum_hit_points;
         }
     }
 
@@ -183,12 +208,47 @@ impl Character {
         self.current_hit_points = current;
     }
 
+    pub fn add_temporary_hit_points(&mut self, temp: i32) {
+        if temp < 0 {
+            return;
+        }
+        self.temporary_hit_points += temp;
+    }
+
+    pub fn subtract_temporary_hit_points(&mut self, temp: i32) {
+        if temp < 0 {
+            return;
+        }
+        self.temporary_hit_points -= temp;
+        if self.temporary_hit_points < 0 {
+            self.temporary_hit_points = 0;
+        }
+    }
+
     pub fn set_temporary_hit_points(&mut self, temp: i32) {
         if temp < 0 {
             self.temporary_hit_points = 0;
             return;
         }
         self.temporary_hit_points = temp;
+    }
+
+    pub fn add_success_death_save(&mut self) {
+        self.death_saves.successes += 1;
+        if self.death_saves.successes >= 3 {
+            self.death_saves.successes = 3;
+        }
+    }
+
+    pub fn add_fail_death_save(&mut self) {
+        self.death_saves.failures += 1;
+        if self.death_saves.failures >= 3 {
+            self.death_saves.failures = 3;
+        }
+    }
+
+    pub fn reset_death_saves(&mut self) {
+        self.death_saves = DeathSaves::default();
     }
 }
 
