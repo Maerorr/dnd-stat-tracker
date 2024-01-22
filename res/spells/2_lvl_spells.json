@@ -1,0 +1,53 @@
+[
+  {
+    "name": "Magic Missile",
+    "level": 2,
+    "school": "Evocation",
+    "casting_time": "1 action",
+    "target": "A creature of your choice that you can see within range",
+    "range": "120 feet",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "classes": [
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range. A dart deals 1d4 + 1 force damage to its target. The darts all strike simultaneously, and you can direct them to hit one creature or several.",
+    "higher_levels": "When you cast this spell using a spell slot of 2nd level or higher, the spell creates one more dart for each slot above 1st.",
+    "window_open": false
+  },
+  {
+    "name": "Shield",
+    "level": 2,
+    "school": "Abjuration",
+    "casting_time": " 1 reaction, which you take when you are hit by an attack or targeted by the magic missile spell",
+    "target": "self",
+    "range": "self",
+    "components": "V, S",
+    "duration": "1 round",
+    "classes": [
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from magic missile.",
+    "higher_levels": "",
+    "window_open": false
+  },
+  {
+    "name": "Burning Hands",
+    "level": 2,
+    "school": "Evocation",
+    "casting_time": "1 action",
+    "target": "Self (15-foot cone)",
+    "range": "Self (15-foot cone)",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "classes": [
+      "Sorcerer",
+      "Wizard"
+    ],
+    "description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much damage on a successful one. The fire ignites any flammable objects in the area that aren’t being worn or carried.",
+    "higher_levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.",
+    "window_open": false
+  }
+]

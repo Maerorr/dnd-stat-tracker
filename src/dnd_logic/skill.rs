@@ -228,6 +228,10 @@ impl Skills {
         }
     }
 
+    pub fn set_skill_expertise(&mut self, skill_type: SkillType, expertise: bool) {
+        self.get_skill_mut(skill_type).expertise = expertise;
+    }
+
     pub fn get_skill_proficiency(&self, skill_type: SkillType) -> bool {
         self.get_skill(skill_type).proficiency
     }

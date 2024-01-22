@@ -21,7 +21,11 @@ pub struct Character {
 
     pub proficiency_bonus: i32,
     pub stats: Stats,
-    pub skills: Skills
+    pub skills: Skills,
+
+    pub money: Money,
+
+    pub spell_list: SpellList,
 }
 
 impl Default for Character {
@@ -47,7 +51,9 @@ impl Default for Character {
             proficiency_bonus: 2,
 
             stats: Stats::default(),
-            skills: Skills::default()
+            skills: Skills::default(),
+            money: Money::default(),
+            spell_list: SpellList::default(),
         }
     }
 }
@@ -75,6 +81,7 @@ impl Character {
         self.level += 1;
         self.proficiency_bonus = proficiency_bonus(self.level);
         self.experience = exp_needed_to_lvl(self.level);
+        self.hit_dice_total.count += 1;
     }
 
     pub fn subtract_level(&mut self) {

@@ -6,8 +6,12 @@ TODO:
 - [X] - character basic info (name, class, exp) + editable
 - [X] - ability scores + editable
 - [+/-] - saving throws and skill modifiers, proficiencies and expertise + editable
-- [ ] - hitpoints, AC, temporary hitpoints, hit dice etc. + editable
+- [X] - hitpoints, AC, temporary hitpoints, hit dice etc. + editable
+- [X] - money, including a converter
 - [ ] - equipement as text
 - [ ] - weapons and hit/dmg modifiers
 - [ ] - spell list + spell slots
 - [ ] - local character saves
+
+How it looks currently:
+![image](images/dndstattracker.png)

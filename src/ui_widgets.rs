@@ -1,8 +1,10 @@
-use egui::{Sense, RichText, style::Spacing};
+use std::collections::btree_map::Range;
+
+use egui::{style::Spacing, Align, Layout, RichText, Sense};
 use epaint::{Vec2, Stroke, Pos2, Rounding};
 use strum::IntoEnumIterator;
 
-use crate::{app::{EDIT_MODE, MAIN_COLOR}, dnd_logic::prelude::*};
+use crate::{app::*, dnd_logic::{prelude::*, spell}};
 
 pub struct UiWidgets {
     exp_change: String,
@@ -11,6 +13,15 @@ pub struct UiWidgets {
     temp_hp_change: String,
     damage_taken: String,
     temp_hp: String,
+    copper: String,
+    silver: String,
+    electrum: String,
+    gold: String,
+    platinum: String,
+    convert_from_string: String,
+    convert_from: Currency,
+    convert_to: Currency,
+    window_opened: bool,
 }
 
 impl Default for UiWidgets {
@@ -22,6 +33,15 @@ impl Default for UiWidgets {
             temp_hp_change: String::new(),
             damage_taken: String::new(),
             temp_hp: String::new(),
+            copper: String::new(),
+            silver: String::new(),
+            electrum: String::new(),
+            gold: String::new(),
+            platinum: String::new(),
+            convert_from_string: String::new(),
+            convert_from: Currency::Copper,
+            convert_to: Currency::Gold,
+            window_opened: false,
         }
     }
 }
@@ -33,7 +53,7 @@ impl UiWidgets {
         .max_col_width(100.0)
         .show(ui, |ui| {
             ui.centered_and_justified(|ui| {
-                ui.add(egui::Label::new(stat.get_name()));
+                ui.add(egui::Label::new(RichText::new(stat.get_name()).color(stat.get_stat_color())));
             });
             ui.end_row();
             ui.centered_and_justified(|ui| {
@@ -83,6 +103,11 @@ impl UiWidgets {
 
             draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
 
+            let prof_sign = if character.proficiency_bonus > 0 { "+" } else { "" };
+            ui.label(format!("Proficiency Bonus: {}{}", prof_sign, character.proficiency_bonus.to_string()));
+
+            draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
+
             ui.label("Class:");
             if unsafe {EDIT_MODE} {
                 // add combo box with all classes
@@ -114,7 +139,8 @@ impl UiWidgets {
             ui.label(&character.experience.to_string());
 
             if unsafe { EDIT_MODE } {
-                ui.text_edit_singleline(&mut self.exp_change);
+                //ui.text_edit_singleline(&mut self.exp_change);
+                ui.add(egui::TextEdit::singleline(&mut self.exp_change).desired_width(75.0));
                 if ui.button("Add").on_hover_text("Add experience to character").clicked() {
                     if let Ok(exp) = self.exp_change.parse::<i32>() {
                         let new_exp = exp + character.experience;
@@ -160,7 +186,7 @@ impl UiWidgets {
 
                     ui.label(RichText::new(format!("({}{})", sign, bonus)));
 
-                    ui.label(stat.get_name());
+                    ui.label(RichText::new(stat.get_name()).color(stat.get_stat_color()));
                     ui.end_row();
             }
         });
@@ -178,32 +204,37 @@ impl UiWidgets {
                 // is proficient?
                 let mut prof = character.skills.get_skill_proficiency(skill);
                 // has expertise?
-                let expert = character.skills.get_skill_expertise(skill);
+                let mut expert = character.skills.get_skill_expertise(skill);
                 let other_bonus = character.skills.get_skill_other_bonus(skill);
                 let skill_mod = character.stats.get_stat(skill.get_base_stat()).get_modifier();
 
-                // proficiency sombol using empty or filled circle
+                // calculate total bonus
+                let bonus = skill_mod + character.proficiency_bonus * prof as i32 + character.proficiency_bonus * expert as i32 + other_bonus;
+                let sign = if bonus > 0 { "+" } else { "" };
                 if unsafe {EDIT_MODE} {
                     ui.checkbox(&mut prof, " ");
                     character.skills.set_skill_proficiency(skill, prof);
+
+                    ui.label(RichText::new(format!("({}{})", sign, bonus)));
+                    ui.label(skill.get_name());
+                    ui.colored_label(egui::Color32::from_gray(100), RichText::new(format!("({})", skill.get_base_stat().get_short_name())).size(10.0));
+                    ui.checkbox(&mut expert, "");
+                    character.skills.set_skill_expertise(skill, expert);
+
                 } else {
+                    // proficiency sombol using empty or filled circle
+                    ui.label(RichText::new(format!("({}{})", sign, bonus)));
+                    ui.label(RichText::new(format!("{}", skill.get_name())));
+                    ui.label( RichText::new(format!("({})", skill.get_base_stat().get_short_name())).color(skill.get_base_stat().get_stat_color()).size(10.0));
+                    if expert {
+                        ui.label("e");
+                    }
                     if prof {
                         ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
                     } else {
                         ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
                     }
                 }
-                // calculate total bonus
-                let bonus = skill_mod + character.proficiency_bonus * prof as i32 + character.proficiency_bonus * expert as i32 + other_bonus;
-                let sign = if bonus > 0 { "+" } else { "" };
-
-                ui.label(RichText::new(format!("({}{})", sign, bonus)));
-                ui.label(skill.get_name());
-                ui.colored_label(egui::Color32::from_gray(100), RichText::new(format!("({})", skill.get_base_stat().get_short_name())).size(10.0));
-                if expert {
-                    ui.label("e");
-                }
-                
                 
                 ui.end_row();
             }
@@ -286,11 +317,11 @@ impl UiWidgets {
 
                         ui.end_row();
 
-                        ui.label(RichText::new("HP Current: ").size(24.0));
+                        ui.label(RichText::new("HP Current: ").color(CURRENT_HP_COLOR).size(18.0));
                         ui.text_edit_singleline(&mut self.curr_hp_change);
 
                         ui.end_row();
-                        ui.label(RichText::new("HP Temp: ").size(24.0));
+                        ui.label(RichText::new("HP Temp: ").color(TEMP_HP_COLOR).size(18.0));
                         ui.text_edit_singleline(&mut self.temp_hp_change);
 
                         // set the values to character, if parsing fails, don't change the value
@@ -312,69 +343,6 @@ impl UiWidgets {
                         ui.end_row();
                 });
 
-                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
-                
-            } else {
-                ui.columns(3, |columns| {
-                    columns[0].set_width(80.0);
-                    columns[0].vertical_centered(|ui| {
-                        ui.label(character.armor_class.to_string());
-                        ui.label(RichText::new("Armor Class").size(14.0));
-                    });
-                    columns[1].set_width(80.0);
-                    columns[1].vertical_centered(|ui| {
-                        let init = character.stats.get_stat(StatType::Dexterity).get_modifier() + character.initiative_bonus;
-                        let init_sign = if init > 0 { "+" } else { "" };
-                        ui.label(format!("{}{}", init_sign, init));
-                        ui.label(RichText::new("Initiative").size(14.0));
-                    });
-                    columns[2].set_width(80.0);
-                    columns[2].vertical_centered(|ui| {
-                        ui.label(format!("{}{}", character.speed.to_string(), "ft."));
-                        ui.label(RichText::new("Speed").size(14.0));
-                    });
-                });
-
-                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
-            
-                egui::Grid::new(format!("{}{}", "hp_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
-                .min_col_width(50.0)
-                .show(ui, |ui| {
-                    if unsafe {EDIT_MODE} {
-                    } else {
-                        ui.label(RichText::new("HP Max: ").size(14.0));
-                        ui.label(RichText::new(character.maximum_hit_points.to_string()).size(14.0));
-                        ui.end_row();
-                        ui.label(RichText::new("HP Current: ").size(18.0));
-                        ui.label(RichText::new(character.current_hit_points.to_string()).size(18.0));
-                        ui.text_edit_singleline(&mut self.damage_taken);
-                        if ui.button("Take Damage").clicked() {
-                            if let Ok(damage) = self.damage_taken.parse::<i32>() {
-                                character.take_damage(damage);
-                            }
-                        }
-                        if ui.button("Heal").clicked() {
-                            if let Ok(heal) = self.damage_taken.parse::<i32>() {
-                                character.heal_damage(heal);
-                            }
-                        }
-                        ui.end_row();
-                        ui.label(RichText::new("HP Temp: ").size(18.0));
-                        ui.label(RichText::new(character.temporary_hit_points.to_string()).size(18.0));
-                        ui.text_edit_singleline(&mut self.temp_hp);
-                        if ui.button("Add").clicked() {
-                            if let Ok(damage) = self.damage_taken.parse::<i32>() {
-                                character.add_temporary_hit_points(damage);
-                            }
-                        }
-                        if ui.button("Subtract").clicked() {
-                            if let Ok(heal) = self.damage_taken.parse::<i32>() {
-                                character.subtract_temporary_hit_points(heal);
-                            }
-                        }
-                        ui.end_row();
-                    }
-                });
                 draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
 
                 ui.horizontal(|ui| {
@@ -425,10 +393,304 @@ impl UiWidgets {
                     });
                 });
                 
+            } else {
+
+                // NON EDIT UI
+
+                ui.columns(3, |columns| {
+                    columns[0].set_width(80.0);
+                    columns[0].vertical_centered(|ui| {
+                        ui.label(character.armor_class.to_string());
+                        ui.label(RichText::new("Armor Class").size(14.0));
+                    });
+                    columns[1].set_width(80.0);
+                    columns[1].vertical_centered(|ui| {
+                        let init = character.stats.get_stat(StatType::Dexterity).get_modifier() + character.initiative_bonus;
+                        let init_sign = if init > 0 { "+" } else { "" };
+                        ui.label(format!("{}{}", init_sign, init));
+                        ui.label(RichText::new("Initiative").size(14.0));
+                    });
+                    columns[2].set_width(80.0);
+                    columns[2].vertical_centered(|ui| {
+                        ui.label(format!("{}{}", character.speed.to_string(), "ft."));
+                        ui.label(RichText::new("Speed").size(14.0));
+                    });
+                });
+
+                ui.add_space(10.0);
+                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+                ui.add_space(10.0);
+
+                egui::Grid::new(format!("{}{}", "hp_grid", if unsafe {EDIT_MODE} { "edit" } else { "" }))
+                .min_col_width(50.0)
+                .show(ui, |ui| {
+                    if unsafe {EDIT_MODE} {
+                    } else {
+                        ui.label(RichText::new("HP Max: ").size(14.0));
+                        ui.label(RichText::new(character.maximum_hit_points.to_string()).size(14.0));
+                        ui.end_row();
+                        ui.label(RichText::new("HP Current: ").color(CURRENT_HP_COLOR).size(18.0));
+                        ui.label(RichText::new(character.current_hit_points.to_string()).size(18.0));
+                        ui.text_edit_singleline(&mut self.damage_taken);
+                        if ui.button("Take Damage").clicked() {
+                            if let Ok(damage) = self.damage_taken.parse::<i32>() {
+                                character.take_damage(damage);
+                            }
+                        }
+                        if ui.button("Heal").clicked() {
+                            if let Ok(heal) = self.damage_taken.parse::<i32>() {
+                                character.heal_damage(heal);
+                            }
+                        }
+                        ui.end_row();
+                        ui.label(RichText::new("HP Temp: ").color(TEMP_HP_COLOR).size(18.0));
+                        ui.label(RichText::new(character.temporary_hit_points.to_string()).size(18.0));
+                        ui.text_edit_singleline(&mut self.temp_hp);
+                        if ui.button("Add").clicked() {
+                            if let Ok(damage) = self.damage_taken.parse::<i32>() {
+                                character.add_temporary_hit_points(damage);
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(heal) = self.damage_taken.parse::<i32>() {
+                                character.subtract_temporary_hit_points(heal);
+                            }
+                        }
+                        ui.end_row();
+                    }
+                });
+
+                ui.add_space(10.0);
+                draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+                ui.add_space(10.0);
+
+                ui.horizontal(|ui| {
+                    ui.vertical(|ui| {
+                        ui.label(RichText::new("Hit Dice Total"));
+                        ui.end_row();
+                        ui.label(RichText::new(character.hit_dice_total.to_string()));
+                    });
+                    ui.add_space(80.0);
+                    ui.vertical(|ui| {
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new("Successes").size(14.0));
+                            let successes = character.death_saves.successes;
+                            for _ in 0..successes {
+                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
+                            }
+                            for _ in 0..(3 - successes) {
+                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
+                            }
+
+                            if ui.button("Success").clicked() {
+                                character.add_success_death_save();
+                            }
+
+                        });
+
+                        ui.horizontal(|ui| {
+                            ui.label(RichText::new("Failures").size(14.0));
+                            ui.add_space(15.0);
+                            let failures = character.death_saves.failures;
+                            for _ in 0..failures {
+                                draw_circle_filled(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
+                            }
+                            for _ in 0..(3 - failures) {
+                                draw_circle_stroke(ui, Vec2::new(10.0, 10.0), 5.0, MAIN_COLOR);
+                            }
+
+                            if ui.button("Failure").clicked() {
+                                character.add_fail_death_save();
+                            }
+                        });
+
+                        ui.vertical_centered(|ui| {
+                            if ui.button("Reset Death Saves").clicked() {
+                                character.death_saves = DeathSaves::default();
+                            }
+                        });
+                    });
+                });
+                
             }
+            ui.add_space(10.0);
+            draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+        });
+    }
+
+    pub fn display_money(&mut self, ui: &mut egui::Ui, character: &mut Character) {
+        ui.add_space(10.0);
+        ui.vertical(|ui| {
+            ui.horizontal(|ui| {
+                ui.columns(5, |columns| {
+                    columns[0].vertical_centered(|ui| {
+                        ui.label(format!("{}", character.money.copper));
+                        ui.label(RichText::new("cp").color(COPPER_COLOR));
+                        ui.add(egui::TextEdit::singleline(&mut self.copper).desired_width(50.0));
+                        if ui.button("Add").clicked() {
+                            if let Ok(copper) = self.copper.parse::<i32>() {
+                                character.money.add_money(&Currency::Copper, copper);
+                                self.copper = "".to_string();
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(copper) = self.copper.parse::<i32>() {
+                                character.money.subtract_money(&Currency::Copper, copper);
+                                self.copper = "".to_string();
+                            }
+                        }
+                    });
+                    columns[1].vertical_centered(|ui| {
+                        ui.label(format!("{}", character.money.silver));
+                        ui.label(RichText::new("sp").color(SILVER_COLOR));
+                        ui.add(egui::TextEdit::singleline(&mut self.silver).desired_width(50.0));
+                        if ui.button("Add").clicked() {
+                            if let Ok(silver) = self.silver.parse::<i32>() {
+                                character.money.add_money(&Currency::Silver, silver);
+                                self.silver = "".to_string();
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(silver) = self.silver.parse::<i32>() {
+                                character.money.subtract_money(&Currency::Silver, silver);
+                                self.silver = "".to_string();
+                            }
+                        }
+                    });
+                    columns[2].vertical_centered(|ui| {
+                        ui.label(format!("{}", character.money.electrum));
+                        ui.label(RichText::new("ep").color(ELECTRUM_COLOR));
+                        ui.add(egui::TextEdit::singleline(&mut self.electrum).desired_width(50.0));
+                        if ui.button("Add").clicked() {
+                            if let Ok(electrum) = self.electrum.parse::<i32>() {
+                                character.money.add_money(&Currency::Electrum, electrum);
+                                self.electrum = "".to_string();
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(electrum) = self.electrum.parse::<i32>() {
+                                character.money.subtract_money(&Currency::Electrum, electrum);
+                                self.electrum = "".to_string();
+                            }
+                        }
+                    });
+                    columns[3].vertical_centered(|ui| {
+                        ui.label(format!("{}", character.money.gold));
+                        ui.label(RichText::new("gp").color(GOLD_COLOR));
+                        ui.add(egui::TextEdit::singleline(&mut self.gold).desired_width(50.0));
+                        if ui.button("Add").clicked() {
+                            if let Ok(gold) = self.gold.parse::<i32>() {
+                                character.money.add_money(&Currency::Gold, gold);
+                                self.gold = "".to_string();
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(gold) = self.gold.parse::<i32>() {
+                                character.money.subtract_money(&Currency::Gold, gold);
+                                self.gold = "".to_string();
+                            }
+                        }
+                    });
+                    columns[4].vertical_centered(|ui| {
+                        ui.label(format!("{}", character.money.platinum));
+                        ui.label(RichText::new("pp").color(PLATINUM_COLOR));
+                        ui.add(egui::TextEdit::singleline(&mut self.platinum).desired_width(50.0));
+                        if ui.button("Add").clicked() {
+                            if let Ok(platinum) = self.platinum.parse::<i32>() {
+                                character.money.add_money(&Currency::Platinum, platinum);
+                                self.platinum = "".to_string();
+                            }
+                        }
+                        if ui.button("Subtract").clicked() {
+                            if let Ok(platinum) = self.platinum.parse::<i32>() {
+                                character.money.subtract_money(&Currency::Platinum, platinum);
+                                self.platinum = "".to_string();
+                            }
+                        }
+                    });
+
+                });
+            });
+
+            draw_horizontal_line_at_least(ui, Vec2::new(380.0, 1.0), egui::Color32::from_gray(100));
+
+            ui.vertical_centered(|ui| {ui.label("Convert");});
+
+            ui.horizontal(|ui| {
+                ui.add(egui::TextEdit::singleline(&mut self.convert_from_string).desired_width(50.0));
+                egui::ComboBox::new("convert_from", "")
+                .selected_text(&self.convert_from.to_string())
+                .show_ui(ui, |ui| {
+                    ui.style_mut().wrap = Some(false);
+                    ui.set_min_width(60.0);
+                    ui.selectable_value(&mut self.convert_from, Currency::Copper, "Copper");
+                    ui.selectable_value(&mut self.convert_from, Currency::Silver, "Silver");
+                    ui.selectable_value(&mut self.convert_from, Currency::Electrum, "Electrum");
+                    ui.selectable_value(&mut self.convert_from, Currency::Gold, "Gold");
+                    ui.selectable_value(&mut self.convert_from, Currency::Platinum, "Platinum");
+                });
+                let (rect, response) = ui.allocate_at_least(Vec2::new(75.0, 10.0), Sense::hover());
+                ui.painter().arrow(rect.left_center(), Vec2::new(70.0, 0.0), Stroke::new(2.0, MAIN_COLOR));
+                egui::ComboBox::new("convert_to", "")
+                .selected_text(&self.convert_to.to_string())
+                .show_ui(ui, |ui| {
+                    ui.style_mut().wrap = Some(false);
+                    ui.set_min_width(60.0);
+                    ui.selectable_value(&mut self.convert_to, Currency::Copper, "Copper");
+                    ui.selectable_value(&mut self.convert_to, Currency::Silver, "Silver");
+                    ui.selectable_value(&mut self.convert_to, Currency::Electrum, "Electrum");
+                    ui.selectable_value(&mut self.convert_to, Currency::Gold, "Gold");
+                    ui.selectable_value(&mut self.convert_to, Currency::Platinum, "Platinum");
+
+                })
+            });
+
+            ui.vertical_centered(|ui| {
+                if ui.button("Convert").clicked() {
+                    if let Ok(amount) = self.convert_from_string.parse::<i32>() {
+                        if let Some(new_amount) = character.money.convert_money(amount, &self.convert_from, &self.convert_to) {
+                            if *character.money.get_currency_mut(&self.convert_from) >= amount {
+                                character.money.subtract_money(&self.convert_from, amount);
+                                character.money.add_money(&self.convert_to, new_amount);
+                                println!("Converted {} {} to {} {}", amount, self.convert_from.to_string(), new_amount, self.convert_to.to_string());
+                            } else {
+                                println!("Not enough money to convert {} {}", self.convert_from.to_string(), amount);
+                            }
+                        }
+                    }
+                }
+            });
             
-            
-            
+        });
+    }
+
+    pub fn display_spell_list(&mut self, ctx: &egui::Context, ui: &mut egui::Ui, character: &mut Character) {
+        ui.vertical_centered(|ui| {
+            ui.horizontal(|ui| {
+                ui.columns(4, |cols| {
+                    for col in cols.iter_mut() {
+                        col.set_width(200.0);
+                    }
+                    cols[0].vertical(|ui| {
+                        // todo: dont forget cantrips later
+                        ui.label("Level 1");
+                        draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
+
+                        for spell_1 in character.spell_list.get_spells_of_level(1) {
+                            draw_spell_entry(ctx, ui, spell_1);
+                        }
+
+                        ui.add_space(20.0);
+                        ui.label("Level 2");
+                        
+                        draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
+
+                        for spell_2 in character.spell_list.get_spells_of_level(2) {
+                            draw_spell_entry(ctx, ui, spell_2);
+                        }
+                    });
+                });
+            });
         });
     }
 }
@@ -479,4 +741,19 @@ pub fn draw_circle_filled(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egu
     let (rect, _response) = ui.allocate_at_least(vec2, Sense::hover());
 
     ui.painter().circle_filled(rect.center(), radius, color);
+}
+
+pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, spell: &mut spell::Spell) {
+    ui.columns(2, |cols| {
+        cols[0].set_min_width(150.0);
+        cols[1].set_width(50.0);
+
+        cols[0].horizontal( |ui| {
+            spell.display_spell_name(ui);
+        });
+        cols[1].with_layout(Layout::left_to_right(Align::RIGHT), |ui| {
+            spell.display_spell_more_button(ctx, ui);
+        });
+    });
+    draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 }

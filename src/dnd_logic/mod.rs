@@ -7,5 +7,8 @@ pub mod skill_type;
 pub mod skill;
 pub mod death_saves;
 pub mod character;
+pub mod money;
+pub mod spell;
+pub mod spell_list;
 
 pub mod prelude;

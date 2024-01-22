@@ -1,5 +1,7 @@
 use strum_macros::EnumIter;
 
+use crate::app::*;
+
 #[derive(Debug, EnumIter, Clone, Copy)]
 pub enum StatType {
     Strength,
@@ -30,6 +32,17 @@ impl StatType {
             StatType::Intelligence => String::from("INT"),
             StatType::Wisdom => String::from("WIS"),
             StatType::Charisma => String::from("CHA"),
+        }
+    }
+
+    pub fn get_stat_color(&self) -> egui::Color32 {
+        match self {
+            StatType::Strength => STRENGTH_COLOR,
+            StatType::Dexterity => DEXTERITY_COLOR,
+            StatType::Constitution => CONSTITUTION_COLOR,
+            StatType::Intelligence => INTELLIGENCE_COLOR,
+            StatType::Wisdom => WISDOM_COLOR,
+            StatType::Charisma => CHARISMA_COLOR,
         }
     }
 }

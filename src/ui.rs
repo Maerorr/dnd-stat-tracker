@@ -49,7 +49,7 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
             
         });
 
-        let side_panel = egui::SidePanel::left(format!("{}{}", "side_panel", unsafe {EDIT_MODE.to_string()}))
+        let left_side_panel = egui::SidePanel::left(format!("{}{}", "side_panel", unsafe {EDIT_MODE.to_string()}))
         .min_width(350.0)
         .resizable(false)
         .show_inside(ui, |ui| {
@@ -92,10 +92,27 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
                 ui.vertical(|ui| {
                     ui.add_space(10.0);
                     stat_tracker.ui_widgets.display_health_stats(ui, &mut stat_tracker.characters[stat_tracker.current_character]);
+
+                    stat_tracker.ui_widgets.display_money(ui, &mut stat_tracker.characters[stat_tracker.current_character]);
                 });
             
             });
             
-        });                  
+        });     
+
+        egui::SidePanel::right(format!("{}{}", "right_side_panel", unsafe {EDIT_MODE.to_string()}))
+        .min_width(ui.available_width())
+        .resizable(false)
+        .show_inside(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.add_space(15.0);
+                ui.vertical_centered(|ui| {
+                    ui.heading("todo: switch button for spells/eq");
+                    stat_tracker.ui_widgets.display_spell_list(ctx, ui, &mut stat_tracker.characters[stat_tracker.current_character]);
+                });
+                
+                ui.add_space(15.0);
+            });      
+        });      
     });
 }

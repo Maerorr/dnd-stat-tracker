@@ -53,6 +53,10 @@ impl Stat {
     pub fn subtract_one(&mut self) {
         self.set_value(self.value - 1)
     }
+
+    pub fn get_stat_color(&self) -> egui::Color32 {
+        self.stat.get_stat_color()
+    }
 }
 
 pub struct Stats {
@@ -112,6 +116,10 @@ impl Stats {
             StatType::Wisdom => &self.wisdom,
             StatType::Charisma => &self.charisma,
         }
+    }
+
+    pub fn get_stat_color(&self, stat_type: StatType) -> egui::Color32 {
+        self.get_stat(stat_type).stat.get_stat_color()
     }
 
     pub fn get_stat_value(&self, stat_type: StatType) -> i32 {
