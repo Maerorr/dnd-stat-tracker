@@ -1,0 +1,75 @@
+[
+    {
+        "name": "Control Flames",
+        "level": 0,
+        "ritual": false,
+        "school": "Transmutation",
+        "casting_time": "1 action",
+        "target": "",
+        "range": "60 feet",
+        "components": "S",
+        "duration": "Instantaneous or 1 hour",
+        "classes": [
+          "Druid",
+          "Sorcerer",
+          "Wizard"
+        ],
+        "description": "You choose nonmagical flame that you can see within range and that fits within a 5-foot cube. You affect it in one of the following ways: \n- You instantaneously expand the flame 5 feet in one direction, provided that wood or other fuel is present in the new location.\n- You instantaneously extinguish the flames within the cube. \n- You double or halve the area of bright light and dim light cast by the flame, change its color, or both. The change lasts for 1 hour.\n- You cause simple shapes—such as the vague form of a creature, an inanimate object, or a location—to appear within the flames and animate as you like. The shapes last for 1 hour.If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action.",
+        "higher_levels": "",
+        "window_open": false
+    },
+    {
+        "name": "Sapping Sting",
+        "level": 0,
+        "ritual": false,
+        "school": "Necromancy",
+        "casting_time": "1 action",
+        "target": "",
+        "range": "30 feet",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "classes": [
+          "Wizard"
+        ],
+        "description": "You sap the vitality of one creature you can see in range. The target must succeed on a Constitution saving throw or take 1d4 necrotic damage and fall prone.",
+        "higher_levels": "This spell's damage increases by 1d4 when you reach 5th level (2d4), 11th level (3d4), and 17th level (4d4).",
+        "window_open": false
+    },
+    {
+        "name": "Fire Bolt",
+        "level": 0,
+        "ritual": false,
+        "school": "Evocation",
+        "casting_time": "1 action",
+        "target": "A creature or object within range",
+        "range": "120 feet",
+        "components": "V, S",
+        "duration": "Instantaneous",
+        "classes": [
+            "Sorcerer",
+          "Wizard"
+        ],
+        "description": "You hurl a mote of fire at a creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it isn’t being worn or carried.",
+        "higher_levels": "This spell’s damage increases by 1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th level (4d10).",
+        "window_open": false
+    },
+    {
+        "name": "Dancing Lights",
+        "level": 0,
+        "ritual": false,
+        "school": "Evocation",
+        "casting_time": "1 action",
+        "target": "Four points within range",
+        "range": "120 feet",
+        "components": "V S M (A bit of phosphorus or wychwood, or a glowworm)",
+        "duration": "Concentration. Up to 1 minute",
+        "classes": [
+            "Bard",
+            "Sorcerer",
+          "Wizard"
+        ],
+        "description": "You create up to four torch-sized lights within range, making them appear as torches, lanterns, or glowing orbs that hover in the air for the duration. You can also combine the four lights into one glowing vaguely humanoid form of Medium size. Whichever form you choose, each light sheds dim light in a 10-foot radius.\nAs a bonus action on your turn, you can move the lights up to 60 feet to a new spot within range. A light must be within 20 feet of another light created by this spell, and a light winks out if it exceeds the spell’s range.",
+        "higher_levels": "",
+        "window_open": false
+    }
+]

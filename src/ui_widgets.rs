@@ -22,6 +22,9 @@ pub struct UiWidgets {
     convert_from: Currency,
     convert_to: Currency,
     window_opened: bool,
+    spell_database: SpellList,
+    display_add_spell_window: bool,
+    add_spell_lvl: i32,
 }
 
 impl Default for UiWidgets {
@@ -42,11 +45,18 @@ impl Default for UiWidgets {
             convert_from: Currency::Copper,
             convert_to: Currency::Gold,
             window_opened: false,
+            spell_database: SpellList::default(),
+            display_add_spell_window: false,
+            add_spell_lvl: 0,
         }
     }
 }
 
 impl UiWidgets {
+    pub fn set_spell_database(&mut self, spell_database: SpellList) {
+        self.spell_database = spell_database;
+    }
+
     pub fn single_stat_widget(&self, ui: &mut egui::Ui, stat: &mut Stat, i: usize) {
         egui::Grid::new(format!("stat_{}{}", stat.get_name(), if unsafe {EDIT_MODE} { "edit" } else { "" }))
         .min_col_width(10.0)
@@ -673,11 +683,35 @@ impl UiWidgets {
                     }
                     cols[0].vertical(|ui| {
                         // todo: dont forget cantrips later
+
+                        ui.label("Cantrips");
+                        draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
+
+                        for mut spell_0 in character.spell_list.get_spells_of_level(0).clone() {
+                            draw_spell_entry(ctx, ui, character, &mut spell_0);
+                        }
+
+                        if unsafe {EDIT_MODE} {
+                            if ui.button("Add Cantrip").clicked() {
+                                self.add_spell_lvl = 0;
+                                self.display_add_spell_window = true;
+                            }
+                        }
+                        
+
+                        ui.add_space(20.0);
                         ui.label("Level 1");
                         draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 
-                        for spell_1 in character.spell_list.get_spells_of_level(1) {
-                            draw_spell_entry(ctx, ui, spell_1);
+                        for mut spell_1 in character.spell_list.get_spells_of_level(1).clone() {
+                            draw_spell_entry(ctx, ui, character, &mut spell_1);
+                        }
+
+                        if unsafe {EDIT_MODE} {
+                            if ui.button("Add Level 1 Spell").clicked() {
+                                self.add_spell_lvl = 1;
+                                self.display_add_spell_window = true;
+                            }
                         }
 
                         ui.add_space(20.0);
@@ -685,11 +719,38 @@ impl UiWidgets {
                         
                         draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 
-                        for spell_2 in character.spell_list.get_spells_of_level(2) {
-                            draw_spell_entry(ctx, ui, spell_2);
+                        for mut spell_2 in character.spell_list.get_spells_of_level(2).clone() {
+                            draw_spell_entry(ctx, ui, character, &mut spell_2);
+                        }
+
+                        if unsafe {EDIT_MODE} {
+                            if ui.button("Add Level 2 Spell").clicked() {
+                                self.add_spell_lvl = 2;
+                                self.display_add_spell_window = true;
+                            }
                         }
                     });
                 });
+            });
+            self.display_add_spell(&ui, character, self.add_spell_lvl)
+        });
+    }
+
+    pub fn display_add_spell(&mut self, ui: &egui::Ui, character: &mut Character, lvl: i32) {
+        let spells_of_lvl = self.spell_database.get_spells_of_level(lvl).clone();
+        // display a new window with all spells as buttons
+        egui::Window::new(format!("Add Spell Level {}", lvl))
+        .open(&mut self.display_add_spell_window)
+        .show(ui.ctx(), |ui| {
+            ui.vertical(|ui| {
+                for spell in spells_of_lvl {
+                    if character.spell_list.get_spells_of_level(lvl).contains(&spell) {
+                        continue;
+                    }
+                    if ui.button(spell.name.to_string()).clicked() {
+                        character.spell_list.add_spell(&spell);
+                    }
+                }
             });
         });
     }
@@ -743,7 +804,7 @@ pub fn draw_circle_filled(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egu
     ui.painter().circle_filled(rect.center(), radius, color);
 }
 
-pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, spell: &mut spell::Spell) {
+pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, character: &mut Character, spell: &mut spell::Spell) {
     ui.columns(2, |cols| {
         cols[0].set_min_width(150.0);
         cols[1].set_width(50.0);
@@ -751,9 +812,16 @@ pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, spell: &mut spel
         cols[0].horizontal( |ui| {
             spell.display_spell_name(ui);
         });
-        cols[1].with_layout(Layout::left_to_right(Align::RIGHT), |ui| {
-            spell.display_spell_more_button(ctx, ui);
+        cols[1].horizontal( |ui| {
+            if unsafe {EDIT_MODE} {
+                if ui.button("✖").clicked() {
+                    character.spell_list.remove_spell_of_level(spell.level, spell)
+                }
+            } else {
+                spell.display_spell_more_button(ctx, ui);
+            }
         });
     });
     draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 }
+

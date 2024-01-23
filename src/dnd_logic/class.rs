@@ -1,9 +1,9 @@
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 use super::dice::Dice;
 
-#[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Class {
     Barbarian,
     Bard,

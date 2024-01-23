@@ -5,7 +5,7 @@ use egui_extras::StripBuilder;
 use epaint::{Vec2, Rect, Pos2, Stroke};
 use strum::IntoEnumIterator;
 
-use crate::{ui_widgets::{UiWidgets, self, centered_label, centered_heading}, dnd_logic::prelude::*, ui::stat_tracker_ui};
+use crate::{ui_widgets::{UiWidgets, self, centered_label, centered_heading}, dnd_logic::{prelude::*, spell}, ui::{self, stat_tracker_ui}};
 
 //create global variable EDIT_MODE
 
@@ -47,6 +47,7 @@ fn configure_text_styles(ctx: &egui::Context) {
 
 fn load_spells_from_files() -> SpellList {
     let path = std::path::Path::new("res/spells");
+    let cantrips_json = File::open(path.join("cantrips.json")).unwrap();
     let spells_1_lvl_json = File::open(path.join("1_lvl_spells.json")).unwrap();
     let spells_2_lvl_json = File::open(path.join("2_lvl_spells.json")).unwrap();
     // let spells_3_lvl_json = File::open(path.join("3_lvl_spells.json")).unwrap();
@@ -58,6 +59,7 @@ fn load_spells_from_files() -> SpellList {
     // let spells_9_lvl_json = File::open(path.join("9_lvl_spells.json")).unwrap();
     
     let mut spell_database = SpellList::default();
+    spell_database.cantrips = serde_json::from_reader(cantrips_json).unwrap();
     spell_database.spells_1_lvl = serde_json::from_reader(spells_1_lvl_json).unwrap();
     spell_database.spells_2_lvl = serde_json::from_reader(spells_2_lvl_json).unwrap();
     // spell_database.spells_3_lvl = serde_json::from_reader(spells_3_lvl_json)).unwrap();
@@ -143,19 +145,23 @@ impl StatTracker {
         configure_text_styles(&cc.egui_ctx);
         let spell_database = load_spells_from_files();
         let mut def_char = Character::test_character();
+
+        def_char.spell_list.add_spell(&spell_database.cantrips[0]);
+        def_char.spell_list.add_spell(&spell_database.cantrips[1]);
+        def_char.spell_list.add_spell(&spell_database.cantrips[2]);
+
         def_char.spell_list.add_spell(&spell_database.spells_1_lvl[0]);
         def_char.spell_list.add_spell(&spell_database.spells_1_lvl[1]);
         def_char.spell_list.add_spell(&spell_database.spells_1_lvl[2]);
 
-        def_char.spell_list.add_spell(&spell_database.spells_2_lvl[0]);
-        def_char.spell_list.add_spell(&spell_database.spells_2_lvl[1]);
-        def_char.spell_list.add_spell(&spell_database.spells_2_lvl[2]);
+        let mut ui_widgets = UiWidgets::default();
+        ui_widgets.set_spell_database(spell_database.clone());
 
         Self {
             state: AppState::StatTracker,
             characters: vec![def_char],
             current_character: 0,
-            ui_widgets: UiWidgets::default(),
+            ui_widgets,
             first_frame: true,
             spell_database,
         }

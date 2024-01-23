@@ -3,6 +3,8 @@ use egui::{Response, RichText, Sense};
 use epaint::{vec2, Rect, Vec2};
 use serde::{Serialize, Deserialize};
 
+use super::class::Class;
+
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum SchoolOfMagic {
@@ -45,6 +47,8 @@ pub struct Spell {
     pub duration: String,
     pub description: String,
     pub higher_levels: String,
+    pub classes: Vec<Class>,
+    pub ritual: bool,
     pub window_open: bool,
 }
 
@@ -59,6 +63,8 @@ impl Spell {
         components: String,
         duration: String,
         description: String,
+        classes: Vec<Class>,
+        ritual: bool,
         higher_levels: String,
     ) -> Self {
         Self {
@@ -72,6 +78,8 @@ impl Spell {
             duration,
             description,
             higher_levels,
+            classes,
+            ritual,
             window_open: false,
         }
     }
@@ -81,15 +89,11 @@ impl Spell {
     }
 
     pub fn try_to_show_spell_window(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
-        let window = egui::Window::new(format!("{}{}", self.name, self.level.to_string())).title_bar(false).open(&mut self.window_open)
+        let window = egui::Window::new(format!("{}", self.name).to_string()).title_bar(false).open(&mut self.window_open)
             .vscroll(false)
             .resizable(true)
             .default_size([400.0, 500.0])
             .show(ctx, |ui| {
-                ui.vertical_centered(|ui|{
-                    ui.heading(RichText::new(format!("{}", self.name)));
-                });
-                
                 ui.vertical(|ui| {
                     ui.separator();
                     ui.vertical(|ui| {
@@ -111,7 +115,7 @@ impl Spell {
     }
 
     pub fn display_spell_name(&mut self, ui: &mut egui::Ui) {
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             ui.label(RichText::new(format!("{}", self.name)).size(14.0));
         });
     }
