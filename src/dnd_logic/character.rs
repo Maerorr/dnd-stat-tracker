@@ -257,5 +257,9 @@ impl Character {
     pub fn reset_death_saves(&mut self) {
         self.death_saves = DeathSaves::default();
     }
+
+    pub fn get_spell_list(&mut self) -> &mut SpellList {
+        &mut self.spell_list
+    }
 }
 

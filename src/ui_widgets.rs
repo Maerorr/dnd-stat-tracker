@@ -682,14 +682,21 @@ impl UiWidgets {
                         col.set_width(200.0);
                     }
                     cols[0].vertical(|ui| {
-                        // todo: dont forget cantrips later
-
                         ui.label("Cantrips");
                         draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 
-                        for mut spell_0 in character.spell_list.get_spells_of_level(0).clone() {
-                            draw_spell_entry(ctx, ui, character, &mut spell_0);
+                        // DISPLAY CANTRIPS
+                        let mut spells_to_delete: Vec<Spell> = Vec::new();
+                        for mut spell_0 in character.spell_list.get_spells_of_level(0) {
+                            let delete = draw_spell_entry(ctx, ui, &mut spell_0);
+                            if delete {
+                                spells_to_delete.push(spell_0.clone());
+                            }
                         }
+                        for spell in spells_to_delete.iter() {
+                            character.spell_list.remove_spell_of_level(0, &spell);
+                        }
+                        spells_to_delete.clear();
 
                         if unsafe {EDIT_MODE} {
                             if ui.button("Add Cantrip").clicked() {
@@ -698,14 +705,21 @@ impl UiWidgets {
                             }
                         }
                         
-
                         ui.add_space(20.0);
                         ui.label("Level 1");
                         draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 
-                        for mut spell_1 in character.spell_list.get_spells_of_level(1).clone() {
-                            draw_spell_entry(ctx, ui, character, &mut spell_1);
+                        // DISPLAY LEVEL 1 SPELLS
+                        for mut spell_1 in character.spell_list.get_spells_of_level(1) {
+                            let delete = draw_spell_entry(ctx, ui, &mut spell_1);
+                            if delete {
+                                spells_to_delete.push(spell_1.clone());
+                            }
                         }
+                        for spell in spells_to_delete.iter() {
+                            character.spell_list.remove_spell_of_level(1, &spell);
+                        }
+                        spells_to_delete.clear();
 
                         if unsafe {EDIT_MODE} {
                             if ui.button("Add Level 1 Spell").clicked() {
@@ -719,9 +733,17 @@ impl UiWidgets {
                         
                         draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
 
-                        for mut spell_2 in character.spell_list.get_spells_of_level(2).clone() {
-                            draw_spell_entry(ctx, ui, character, &mut spell_2);
+                        // DISPLAY LEVEL 2 SPELLS
+                        for mut spell_2 in character.spell_list.get_spells_of_level(2) {
+                            let delete = draw_spell_entry(ctx, ui, &mut spell_2);
+                            if delete {
+                                spells_to_delete.push(spell_2.clone());
+                            }
                         }
+                        for spell in spells_to_delete.iter() {
+                            character.spell_list.remove_spell_of_level(2, &spell);
+                        }
+                        spells_to_delete.clear();
 
                         if unsafe {EDIT_MODE} {
                             if ui.button("Add Level 2 Spell").clicked() {
@@ -804,24 +826,41 @@ pub fn draw_circle_filled(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egu
     ui.painter().circle_filled(rect.center(), radius, color);
 }
 
-pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, character: &mut Character, spell: &mut spell::Spell) {
-    ui.columns(2, |cols| {
-        cols[0].set_min_width(150.0);
-        cols[1].set_width(50.0);
-
-        cols[0].horizontal( |ui| {
+// RETURNS: bool - true meaning remove the spell, false means nothing
+pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, spell: &mut spell::Spell) -> bool {
+    // ui.columns(2, |cols| {
+    //     cols[0].set_min_width(150.0);
+    //     cols[1].set_width(50.0);
+    //     cols[0].horizontal( |ui| {
+    //         spell.display_spell_name(ui);
+    //     });
+    //     cols[1].horizontal( |ui| {
+    //         if unsafe {EDIT_MODE} {
+    //             if ui.button("✖").clicked() {
+    //                 character.spell_list.remove_spell_of_level(spell.level, spell)
+    //             }
+    //         } else {
+    //             spell.display_spell_more_button(ctx, ui);
+    //         }
+    //     });
+    // });
+    let mut flag = false;
+    ui.horizontal(|ui| {
+        ui.with_layout(Layout::left_to_right(Align::LEFT), |ui| {
             spell.display_spell_name(ui);
         });
-        cols[1].horizontal( |ui| {
+        ui.with_layout(Layout::right_to_left(Align::RIGHT), |ui| {
             if unsafe {EDIT_MODE} {
                 if ui.button("✖").clicked() {
-                    character.spell_list.remove_spell_of_level(spell.level, spell)
+                    flag = true;
                 }
             } else {
-                spell.display_spell_more_button(ctx, ui);
+                spell.display_spell_more_button(ui);
             }
         });
     });
+    spell.try_to_show_spell_window(ctx, ui);
     draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
+    flag
 }
 

@@ -83,13 +83,8 @@ impl Spell {
             window_open: false,
         }
     }
-
-    pub fn display_spell_window(&mut self) {
-        self.window_open = true;
-    }
-
     pub fn try_to_show_spell_window(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
-        let window = egui::Window::new(format!("{}", self.name).to_string()).title_bar(false).open(&mut self.window_open)
+        egui::Window::new(format!("{}", self.name).to_string()).title_bar(true).open(&mut self.window_open)
             .vscroll(false)
             .resizable(true)
             .default_size([400.0, 500.0])
@@ -114,24 +109,21 @@ impl Spell {
             });
     }
 
-    pub fn display_spell_name(&mut self, ui: &mut egui::Ui) {
+    pub fn display_spell_name(&self, ui: &mut egui::Ui) {
         ui.horizontal_wrapped(|ui| {
-            ui.label(RichText::new(format!("{}", self.name)).size(14.0));
+            let (rect, response) = ui.allocate_at_least(vec2(130.0, 14.0), Sense::hover());
+            ui.put(rect, egui::Label::new(RichText::new(format!("{}", self.name)).size(14.0)));
+            //ui.label(RichText::new(format!("{}", self.name)).size(14.0));
         });
     }
 
-    pub fn display_spell_more_button(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    pub fn display_spell_more_button(&mut self, ui: &mut egui::Ui) {
         if ui.button("More").clicked() {
             if self.window_open {
-                self.close_spell_window();
+                self.window_open = false;
             } else {
-                self.display_spell_window();
+                self.window_open = true;
             }
         }
-        self.try_to_show_spell_window(ctx, ui);
-    }
-
-    pub fn close_spell_window(&mut self) {
-        self.window_open = false;
     }
 }
