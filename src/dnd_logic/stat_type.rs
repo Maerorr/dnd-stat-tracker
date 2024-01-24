@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 use crate::app::*;
 
-#[derive(Debug, EnumIter, Clone, Copy)]
+#[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StatType {
     Strength,
     Dexterity,

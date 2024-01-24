@@ -1,5 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use super::{stat_type::StatType, utils::stat_to_modifier};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Stat {
     pub stat: StatType,
     pub value: i32,
@@ -59,6 +62,7 @@ impl Stat {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Stats {
     pub strength: Stat,
     pub dexterity: Stat,

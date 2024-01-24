@@ -1,8 +1,8 @@
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 
-#[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Currency {
     Copper,
     Silver,
@@ -121,7 +121,7 @@ mod tests {
 
 }
 
-
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Money {
     pub copper: i32,
     pub silver: i32,

@@ -675,7 +675,7 @@ impl UiWidgets {
     }
 
     pub fn display_spell_list(&mut self, ctx: &egui::Context, ui: &mut egui::Ui, character: &mut Character) {
-        let mut spells_to_delete: Vec<Spell> = Vec::new();
+        let mut spells_to_delete: Vec<(Spell, bool)> = Vec::new();
 
         ui.horizontal(|ui|{
             ui.vertical(|ui| {
@@ -683,14 +683,14 @@ impl UiWidgets {
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     
                 // DISPLAY CANTRIPS
-                for mut spell_0 in character.spell_list.get_spells_of_level(0) {
+                for mut spell_0 in character.spell_list.get_cantrips() {
                     let delete = draw_spell_entry(ctx, ui, &mut spell_0);
                     if delete {
                         spells_to_delete.push(spell_0.clone());
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(0, &spell);
+                    character.spell_list.remove_spell_of_level(0, &spell.0);
                 }
                 spells_to_delete.clear();
     
@@ -713,7 +713,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(1, &spell);
+                    character.spell_list.remove_spell_of_level(1, &spell.0);
                 }
                 spells_to_delete.clear();
     
@@ -737,7 +737,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(2, &spell);
+                    character.spell_list.remove_spell_of_level(2, &spell.0);
                 }
                 spells_to_delete.clear();
     
@@ -760,7 +760,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(3, &spell);
+                    character.spell_list.remove_spell_of_level(3, &spell.0);
                 }
                 spells_to_delete.clear();
     
@@ -783,7 +783,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(4, &spell);
+                    character.spell_list.remove_spell_of_level(4, &spell.0);
                 }
                 spells_to_delete.clear();
     
@@ -806,7 +806,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(5, &spell);
+                    character.spell_list.remove_spell_of_level(5, &spell.0);
                 }
                 spells_to_delete.clear();
 
@@ -828,8 +828,9 @@ impl UiWidgets {
                         spells_to_delete.push(spell_6.clone());
                     }
                 }
+
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(6, &spell);
+                    character.spell_list.remove_spell_of_level(6, &spell.0);
                 }
                 spells_to_delete.clear();
 
@@ -852,7 +853,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(7, &spell);
+                    character.spell_list.remove_spell_of_level(7, &spell.0);
                 }
 
                 if unsafe {EDIT_MODE} {
@@ -874,7 +875,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(8, &spell);
+                    character.spell_list.remove_spell_of_level(8, &spell.0);
                 }
 
                 if unsafe {EDIT_MODE} {
@@ -896,7 +897,7 @@ impl UiWidgets {
                     }
                 }
                 for spell in spells_to_delete.iter() {
-                    character.spell_list.remove_spell_of_level(9, &spell);
+                    character.spell_list.remove_spell_of_level(9, &spell.0);
                 }
 
                 if unsafe {EDIT_MODE} {
@@ -913,7 +914,14 @@ impl UiWidgets {
     }
 
     pub fn display_add_spell(&mut self, ui: &egui::Ui, character: &mut Character, lvl: i32) {
-        let spells_of_lvl = self.spell_database.get_spells_of_level(lvl).clone();
+        let spells_of_lvl = {
+            if lvl == 0 {
+                self.spell_database.get_cantrips().clone()
+
+            } else {
+                self.spell_database.get_spells_of_level(lvl).clone()
+            }
+        };
         // display a new window with all spells as buttons
         egui::Window::new(format!("Add Spell Level {}", lvl))
         .open(&mut self.display_add_spell_window)
@@ -923,8 +931,8 @@ impl UiWidgets {
                     if character.spell_list.get_spells_of_level(lvl).contains(&spell) {
                         continue;
                     }
-                    if ui.button(spell.name.to_string()).clicked() {
-                        character.spell_list.add_spell(&spell);
+                    if ui.button(spell.0.name.to_string()).clicked() {
+                        character.spell_list.add_spell(&spell.0);
                     }
                 }
             });
@@ -981,12 +989,22 @@ pub fn draw_circle_filled(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egu
 }
 
 // RETURNS: bool - true meaning remove the spell, false means nothing
-pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, spell: &mut spell::Spell) -> bool {
+pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, (spell, prepared): &mut (spell::Spell, bool)) -> bool {
     ui.end_row();
     let mut flag = false;
     ui.allocate_ui(Vec2::new(250.0, 36.0), |ui| {
         ui.horizontal(|ui| {
             ui.with_layout(Layout::left_to_right(Align::LEFT), |ui| {
+                if unsafe {EDIT_MODE} {
+                    ui.checkbox(prepared, "");
+                } else {
+                    if *prepared {
+                        draw_circle_filled(ui, Vec2::new(12.0, 14.0), 5.0, MAIN_COLOR);
+                    } else {
+                        draw_circle_stroke(ui, Vec2::new(12.0, 14.0), 5.0, MAIN_COLOR);
+                    }
+                }
+                
                 spell.display_spell_name(ui);
             });
             ui.end_row();

@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 use super::stat_type::StatType;
 
-#[derive(Debug, EnumIter, Clone, Copy)]
+#[derive(Debug, EnumIter, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 pub enum SkillType {
     Acrobatics,
     AnimalHandling,

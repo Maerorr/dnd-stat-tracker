@@ -11,7 +11,9 @@ TODO:
 - [ ] - equipement as text
 - [ ] - weapons and hit/dmg modifiers
 - [ ] - spell list + spell slots
+- [ ] - more spells as json files
 - [ ] - local character saves
+- [ ] - if im really into it, redesign most elements myself for the ui to not look stock
 
 How it looks currently:
 ![image](images/dndstattracker.png)

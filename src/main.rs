@@ -10,7 +10,7 @@ use app::StatTracker;
 
 fn main() -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([1500.0, 900.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([1650.0, 900.0]),
         ..Default::default()
     };
     eframe::run_native(

@@ -12,5 +12,9 @@ epaint = "0.25"
 egui_extras = "0.25"
 strum = "0.25"
 strum_macros = "0.25"
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[build-dependencies]
+copy_to_output = "2.2.0"
+glob = "0.3"

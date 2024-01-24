@@ -33,6 +33,13 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
                             let (but_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 30.0), Sense::hover());
                             let edit_button_response = ui.put(but_rect, egui::Button::new("Edit").min_size(Vec2::new(90.0, 30.0)));
 
+                            let (save_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 30.0), Sense::hover());
+                            let save_button_response = ui.put(save_rect, egui::Button::new("Save").min_size(Vec2::new(90.0, 30.0)));
+
+                            if save_button_response.clicked() {
+                                stat_tracker.characters[stat_tracker.current_character].save_to_file();
+                            }
+
                             if edit_button_response.clicked() {
                                 stat_tracker.state = AppState::StatTrackerEdit;
                                 unsafe { EDIT_MODE = true };

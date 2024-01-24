@@ -1,5 +1,10 @@
-use crate::dnd_logic::prelude::*;
+use std::{fs::File, io::Write};
 
+use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
+
+use crate::{app::CHARACTERS_PATH, dnd_logic::prelude::*};
+
+#[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Character {
     pub name: String,
     pub level: i32,
@@ -25,7 +30,11 @@ pub struct Character {
 
     pub money: Money,
 
+    // DONT SERIALIZE / DESERIALIZE THIS FIELD
+    #[serde(skip)]
     pub spell_list: SpellList,
+
+    spell_names: Vec<String>,
 }
 
 impl Default for Character {
@@ -54,6 +63,7 @@ impl Default for Character {
             skills: Skills::default(),
             money: Money::default(),
             spell_list: SpellList::default(),
+            spell_names: Vec::new(),
         }
     }
 }
@@ -261,5 +271,16 @@ impl Character {
     pub fn get_spell_list(&mut self) -> &mut SpellList {
         &mut self.spell_list
     }
-}
 
+    pub fn add_spell(&mut self, spell:&Spell) {
+        self.spell_names.push(spell.name.clone());
+        self.spell_list.add_spell(&spell);
+    }
+
+    pub fn save_to_file(&self) {
+        let file_name = format!("{}.{}", self.name,"json");
+        let mut file = File::create(CHARACTERS_PATH.to_string() + &file_name).unwrap();
+        let json = serde_json::to_string_pretty(self).unwrap();
+        file.write_all(json.as_bytes()).unwrap();
+    }
+}

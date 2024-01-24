@@ -1,5 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 use super::{skill_type::SkillType, stat_type::StatType};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Skill {
     base_ability: StatType,
     skill_type: SkillType,
@@ -8,6 +11,8 @@ pub struct Skill {
     other_bonus: i32,
 }
 
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Skills {
     acrobatics: Skill,
     animal_handling: Skill,
