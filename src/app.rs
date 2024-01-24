@@ -50,25 +50,25 @@ fn load_spells_from_files() -> SpellList {
     let cantrips_json = File::open(path.join("cantrips.json")).unwrap();
     let spells_1_lvl_json = File::open(path.join("1_lvl_spells.json")).unwrap();
     let spells_2_lvl_json = File::open(path.join("2_lvl_spells.json")).unwrap();
-    // let spells_3_lvl_json = File::open(path.join("3_lvl_spells.json")).unwrap();
-    // let spells_4_lvl_json = File::open(path.join("4_lvl_spells.json")).unwrap();
-    // let spells_5_lvl_json = File::open(path.join("5_lvl_spells.json")).unwrap();
-    // let spells_6_lvl_json = File::open(path.join("6_lvl_spells.json")).unwrap();
-    // let spells_7_lvl_json = File::open(path.join("7_lvl_spells.json")).unwrap();
-    // let spells_8_lvl_json = File::open(path.join("8_lvl_spells.json")).unwrap();
-    // let spells_9_lvl_json = File::open(path.join("9_lvl_spells.json")).unwrap();
+    let spells_3_lvl_json = File::open(path.join("3_lvl_spells.json")).unwrap();
+    let spells_4_lvl_json = File::open(path.join("4_lvl_spells.json")).unwrap();
+    let spells_5_lvl_json = File::open(path.join("5_lvl_spells.json")).unwrap();
+    let spells_6_lvl_json = File::open(path.join("6_lvl_spells.json")).unwrap();
+    let spells_7_lvl_json = File::open(path.join("7_lvl_spells.json")).unwrap();
+    let spells_8_lvl_json = File::open(path.join("8_lvl_spells.json")).unwrap();
+    let spells_9_lvl_json = File::open(path.join("9_lvl_spells.json")).unwrap();
     
     let mut spell_database = SpellList::default();
     spell_database.cantrips = serde_json::from_reader(cantrips_json).unwrap();
     spell_database.spells_1_lvl = serde_json::from_reader(spells_1_lvl_json).unwrap();
     spell_database.spells_2_lvl = serde_json::from_reader(spells_2_lvl_json).unwrap();
-    // spell_database.spells_3_lvl = serde_json::from_reader(spells_3_lvl_json)).unwrap();
-    // spell_database.spells_4_lvl = serde_json::from_reader(spells_4_lvl_json)).unwrap();
-    // spell_database.spells_5_lvl = serde_json::from_reader(spells_5_lvl_json)).unwrap();
-    // spell_database.spells_6_lvl = serde_json::from_reader(spells_6_lvl_json)).unwrap();
-    // spell_database.spells_7_lvl = serde_json::from_reader(spells_7_lvl_json)).unwrap();
-    // spell_database.spells_8_lvl = serde_json::from_reader(spells_8_lvl_json)).unwrap();
-    // spell_database.spells_9_lvl = serde_json::from_reader(spells_9_lvl_json)).unwrap();
+    spell_database.spells_3_lvl = serde_json::from_reader(spells_3_lvl_json).unwrap();
+    spell_database.spells_4_lvl = serde_json::from_reader(spells_4_lvl_json).unwrap();
+    spell_database.spells_5_lvl = serde_json::from_reader(spells_5_lvl_json).unwrap();
+    spell_database.spells_6_lvl = serde_json::from_reader(spells_6_lvl_json).unwrap();
+    spell_database.spells_7_lvl = serde_json::from_reader(spells_7_lvl_json).unwrap();
+    spell_database.spells_8_lvl = serde_json::from_reader(spells_8_lvl_json).unwrap();
+    spell_database.spells_9_lvl = serde_json::from_reader(spells_9_lvl_json).unwrap();
 
     spell_database
 }
@@ -146,13 +146,37 @@ impl StatTracker {
         let spell_database = load_spells_from_files();
         let mut def_char = Character::test_character();
 
-        def_char.spell_list.add_spell(&spell_database.cantrips[0]);
-        def_char.spell_list.add_spell(&spell_database.cantrips[1]);
-        def_char.spell_list.add_spell(&spell_database.cantrips[2]);
-
-        def_char.spell_list.add_spell(&spell_database.spells_1_lvl[0]);
-        def_char.spell_list.add_spell(&spell_database.spells_1_lvl[1]);
-        def_char.spell_list.add_spell(&spell_database.spells_1_lvl[2]);
+        // add all spells from spell database to character
+        for spell in spell_database.cantrips.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_1_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_2_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_3_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_4_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_5_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_6_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_7_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_8_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
+        for spell in spell_database.spells_9_lvl.iter() {
+            def_char.get_spell_list().add_spell(spell);
+        }
 
         let mut ui_widgets = UiWidgets::default();
         ui_widgets.set_spell_database(spell_database.clone());
@@ -168,7 +192,8 @@ impl StatTracker {
     }
 
     pub fn stats_ui(&mut self, ui: &mut egui::Ui) {
-        egui::Grid::new(format!("{}{}", "stats_grid", unsafe {EDIT_MODE.to_string()})).show(ui, |ui| {
+        egui::Grid::new(format!("{}{}", "stats_grid", unsafe {EDIT_MODE.to_string()}))
+        .show(ui, |ui| {
             centered_heading(ui, "Stats");
             ui.end_row();
             for (i, stat) in StatType::iter().enumerate() {

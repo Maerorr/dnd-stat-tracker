@@ -1,5 +1,5 @@
 use eframe::glow::Context;
-use egui::{Response, RichText, Sense};
+use egui::{Align, Layout, Response, RichText, Sense};
 use epaint::{vec2, Rect, Vec2};
 use serde::{Serialize, Deserialize};
 
@@ -110,11 +110,24 @@ impl Spell {
     }
 
     pub fn display_spell_name(&self, ui: &mut egui::Ui) {
-        ui.horizontal_wrapped(|ui| {
-            let (rect, response) = ui.allocate_at_least(vec2(130.0, 14.0), Sense::hover());
-            ui.put(rect, egui::Label::new(RichText::new(format!("{}", self.name)).size(14.0)));
-            //ui.label(RichText::new(format!("{}", self.name)).size(14.0));
-        });
+        
+        //ui.horizontal_wrapped(|ui| {
+            ui.with_layout(Layout::left_to_right(Align::LEFT), |ui|{
+                //let (rect, response) = ui.allocate_at_least(vec2(100.0, 14.0), Sense::hover());
+                ui.label(RichText::new(format!("{}", self.name)).size(14.0));
+                if self.ritual {
+                    ui.label(RichText::new(format!("(R)")).size(12.0));
+                }
+            });
+        //});
+
+        
+        // ui.allocate_ui(vec2(130.0, 14.0), |ui| {
+        //     ui.label(RichText::new(format!("{}", self.name)).size(14.0));
+        //     if self.ritual {
+        //         ui.label(RichText::new(format!("(R)")).size(12.0));
+        //     }
+        // });
     }
 
     pub fn display_spell_more_button(&mut self, ui: &mut egui::Ui) {

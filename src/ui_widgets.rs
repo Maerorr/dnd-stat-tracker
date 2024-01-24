@@ -675,87 +675,241 @@ impl UiWidgets {
     }
 
     pub fn display_spell_list(&mut self, ctx: &egui::Context, ui: &mut egui::Ui, character: &mut Character) {
-        ui.vertical_centered(|ui| {
-            ui.horizontal(|ui| {
-                ui.columns(4, |cols| {
-                    for col in cols.iter_mut() {
-                        col.set_width(200.0);
+        let mut spells_to_delete: Vec<Spell> = Vec::new();
+
+        ui.horizontal(|ui|{
+            ui.vertical(|ui| {
+                ui.label("Cantrips");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+    
+                // DISPLAY CANTRIPS
+                for mut spell_0 in character.spell_list.get_spells_of_level(0) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_0);
+                    if delete {
+                        spells_to_delete.push(spell_0.clone());
                     }
-                    cols[0].vertical(|ui| {
-                        ui.label("Cantrips");
-                        draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
-
-                        // DISPLAY CANTRIPS
-                        let mut spells_to_delete: Vec<Spell> = Vec::new();
-                        for mut spell_0 in character.spell_list.get_spells_of_level(0) {
-                            let delete = draw_spell_entry(ctx, ui, &mut spell_0);
-                            if delete {
-                                spells_to_delete.push(spell_0.clone());
-                            }
-                        }
-                        for spell in spells_to_delete.iter() {
-                            character.spell_list.remove_spell_of_level(0, &spell);
-                        }
-                        spells_to_delete.clear();
-
-                        if unsafe {EDIT_MODE} {
-                            if ui.button("Add Cantrip").clicked() {
-                                self.add_spell_lvl = 0;
-                                self.display_add_spell_window = true;
-                            }
-                        }
-                        
-                        ui.add_space(20.0);
-                        ui.label("Level 1");
-                        draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
-
-                        // DISPLAY LEVEL 1 SPELLS
-                        for mut spell_1 in character.spell_list.get_spells_of_level(1) {
-                            let delete = draw_spell_entry(ctx, ui, &mut spell_1);
-                            if delete {
-                                spells_to_delete.push(spell_1.clone());
-                            }
-                        }
-                        for spell in spells_to_delete.iter() {
-                            character.spell_list.remove_spell_of_level(1, &spell);
-                        }
-                        spells_to_delete.clear();
-
-                        if unsafe {EDIT_MODE} {
-                            if ui.button("Add Level 1 Spell").clicked() {
-                                self.add_spell_lvl = 1;
-                                self.display_add_spell_window = true;
-                            }
-                        }
-
-                        ui.add_space(20.0);
-                        ui.label("Level 2");
-                        
-                        draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
-
-                        // DISPLAY LEVEL 2 SPELLS
-                        for mut spell_2 in character.spell_list.get_spells_of_level(2) {
-                            let delete = draw_spell_entry(ctx, ui, &mut spell_2);
-                            if delete {
-                                spells_to_delete.push(spell_2.clone());
-                            }
-                        }
-                        for spell in spells_to_delete.iter() {
-                            character.spell_list.remove_spell_of_level(2, &spell);
-                        }
-                        spells_to_delete.clear();
-
-                        if unsafe {EDIT_MODE} {
-                            if ui.button("Add Level 2 Spell").clicked() {
-                                self.add_spell_lvl = 2;
-                                self.display_add_spell_window = true;
-                            }
-                        }
-                    });
-                });
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(0, &spell);
+                }
+                spells_to_delete.clear();
+    
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Cantrip").clicked() {
+                        self.add_spell_lvl = 0;
+                        self.display_add_spell_window = true;
+                    }
+                }
+                
+                ui.add_space(20.0);
+                ui.label("Level 1");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+    
+                // DISPLAY LEVEL 1 SPELLS
+                for mut spell_1 in character.spell_list.get_spells_of_level(1) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_1);
+                    if delete {
+                        spells_to_delete.push(spell_1.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(1, &spell);
+                }
+                spells_to_delete.clear();
+    
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 1 Spell").clicked() {
+                        self.add_spell_lvl = 1;
+                        self.display_add_spell_window = true;
+                    }
+                }
+    
+                ui.add_space(20.0);
+                ui.label("Level 2");
+                
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+    
+                // DISPLAY LEVEL 2 SPELLS
+                for mut spell_2 in character.spell_list.get_spells_of_level(2) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_2);
+                    if delete {
+                        spells_to_delete.push(spell_2.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(2, &spell);
+                }
+                spells_to_delete.clear();
+    
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 2 Spell").clicked() {
+                        self.add_spell_lvl = 2;
+                        self.display_add_spell_window = true;
+                    }
+                }
             });
-            self.display_add_spell(&ui, character, self.add_spell_lvl)
+            ui.vertical(|ui| {
+                ui.label("Level 3");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+    
+                // DISPLAY LEVEL 3 SPELLS
+                for mut spell_3 in character.spell_list.get_spells_of_level(3) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_3);
+                    if delete {
+                        spells_to_delete.push(spell_3.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(3, &spell);
+                }
+                spells_to_delete.clear();
+    
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 3 Spell").clicked() {
+                        self.add_spell_lvl = 3;
+                        self.display_add_spell_window = true;
+                    }
+                }
+    
+                ui.add_space(20.0);
+                ui.label("Level 4");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+    
+                // DISPLAY LEVEL 4 SPELLS
+                for mut spell_4 in character.spell_list.get_spells_of_level(4) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_4);
+                    if delete {
+                        spells_to_delete.push(spell_4.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(4, &spell);
+                }
+                spells_to_delete.clear();
+    
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 4 Spell").clicked() {
+                        self.add_spell_lvl = 4;
+                        self.display_add_spell_window = true;
+                    }
+                }
+
+                ui.add_space(20.0);
+                ui.label("Level 5");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+
+                // DISPLAY LEVEL 5 SPELLS
+                for mut spell_5 in character.spell_list.get_spells_of_level(5) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_5);
+                    if delete {
+                        spells_to_delete.push(spell_5.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(5, &spell);
+                }
+                spells_to_delete.clear();
+
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 5 Spell").clicked() {
+                        self.add_spell_lvl = 5;
+                        self.display_add_spell_window = true;
+                    }
+                }
+            });
+            ui.vertical(|ui|{
+                ui.label("Level 6");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+
+                // DISPLAY LEVEL 6 SPELLS
+                for mut spell_6 in character.spell_list.get_spells_of_level(6) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_6);
+                    if delete {
+                        spells_to_delete.push(spell_6.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(6, &spell);
+                }
+                spells_to_delete.clear();
+
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 6 Spell").clicked() {
+                        self.add_spell_lvl = 6;
+                        self.display_add_spell_window = true;
+                    }
+                }
+
+                ui.add_space(20.0);
+                ui.label("Level 7");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+
+                // DISPLAY LEVEL 7 SPELLS
+                for mut spell_7 in character.spell_list.get_spells_of_level(7) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_7);
+                    if delete {
+                        spells_to_delete.push(spell_7.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(7, &spell);
+                }
+
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 7 Spell").clicked() {
+                        self.add_spell_lvl = 7;
+                        self.display_add_spell_window = true;
+                    }
+                }
+
+                ui.add_space(20.0);
+                ui.label("Level 8");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+
+                // DISPLAY LEVEL 8 SPELLS
+                for mut spell_8 in character.spell_list.get_spells_of_level(8) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_8);
+                    if delete {
+                        spells_to_delete.push(spell_8.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(8, &spell);
+                }
+
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 8 Spell").clicked() {
+                        self.add_spell_lvl = 8;
+                        self.display_add_spell_window = true;
+                    }
+                }
+
+                ui.add_space(20.0);
+                ui.label("Level 9");
+                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
+
+                // DISPLAY LEVEL 9 SPELLS
+                for mut spell_9 in character.spell_list.get_spells_of_level(9) {
+                    let delete = draw_spell_entry(ctx, ui, &mut spell_9);
+                    if delete {
+                        spells_to_delete.push(spell_9.clone());
+                    }
+                }
+                for spell in spells_to_delete.iter() {
+                    character.spell_list.remove_spell_of_level(9, &spell);
+                }
+
+                if unsafe {EDIT_MODE} {
+                    if ui.button("Add Level 9 Spell").clicked() {
+                        self.add_spell_lvl = 9;
+                        self.display_add_spell_window = true;
+                    }
+                }
+            });
         });
+        
+        
+        self.display_add_spell(&ui, character, self.add_spell_lvl)
     }
 
     pub fn display_add_spell(&mut self, ui: &egui::Ui, character: &mut Character, lvl: i32) {
@@ -828,39 +982,29 @@ pub fn draw_circle_filled(ui: &mut egui::Ui, vec2: Vec2, radius: f32, color: egu
 
 // RETURNS: bool - true meaning remove the spell, false means nothing
 pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, spell: &mut spell::Spell) -> bool {
-    // ui.columns(2, |cols| {
-    //     cols[0].set_min_width(150.0);
-    //     cols[1].set_width(50.0);
-    //     cols[0].horizontal( |ui| {
-    //         spell.display_spell_name(ui);
-    //     });
-    //     cols[1].horizontal( |ui| {
-    //         if unsafe {EDIT_MODE} {
-    //             if ui.button("✖").clicked() {
-    //                 character.spell_list.remove_spell_of_level(spell.level, spell)
-    //             }
-    //         } else {
-    //             spell.display_spell_more_button(ctx, ui);
-    //         }
-    //     });
-    // });
+    ui.end_row();
     let mut flag = false;
-    ui.horizontal(|ui| {
-        ui.with_layout(Layout::left_to_right(Align::LEFT), |ui| {
-            spell.display_spell_name(ui);
-        });
-        ui.with_layout(Layout::right_to_left(Align::RIGHT), |ui| {
-            if unsafe {EDIT_MODE} {
-                if ui.button("✖").clicked() {
-                    flag = true;
+    ui.allocate_ui(Vec2::new(250.0, 36.0), |ui| {
+        ui.horizontal(|ui| {
+            ui.with_layout(Layout::left_to_right(Align::LEFT), |ui| {
+                spell.display_spell_name(ui);
+            });
+            ui.end_row();
+            ui.with_layout(Layout::right_to_left(Align::RIGHT), |ui| {
+                if unsafe {EDIT_MODE} {
+                    if ui.button("✖").clicked() {
+                        flag = true;
+                    }
+                } else {
+                    spell.display_spell_more_button(ui);
                 }
-            } else {
-                spell.display_spell_more_button(ui);
-            }
+            });
         });
     });
+    
+    ui.end_row();
     spell.try_to_show_spell_window(ctx, ui);
-    draw_horizontal_line_at_least(ui, Vec2::new(200.0, 1.0), egui::Color32::from_gray(100));
+    draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     flag
 }
 

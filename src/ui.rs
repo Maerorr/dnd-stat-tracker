@@ -105,7 +105,7 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
         .resizable(false)
         .show_inside(ui, |ui| {
             ui.horizontal(|ui| {
-                ui.add_space(15.0);
+                //ui.add_space(15.0);
                 ui.vertical_centered(|ui| {
                     ui.heading("todo: switch button for spells/eq");
                     stat_tracker.ui_widgets.display_spell_list(ctx, ui, &mut stat_tracker.characters[stat_tracker.current_character]);
