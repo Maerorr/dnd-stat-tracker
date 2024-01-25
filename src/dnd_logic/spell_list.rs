@@ -24,7 +24,7 @@ impl Default for SpellList {
 }
 
 impl SpellList {
-    pub fn add_spell(&mut self, spell: &Spell) {
+    pub fn add_spell(&mut self, spell: &Spell, prepared: bool) {
         match spell.level {
             0 => {
                 if !self.cantrips.iter().any(|x| x.0.name == spell.name) {
@@ -35,7 +35,7 @@ impl SpellList {
                 if !self.spells[spell.level as usize - 1]
                 .iter()
                 .any(|x| x.0.name == spell.name) {
-                    self.spells[spell.level as usize - 1].push((spell.clone(), false));
+                    self.spells[spell.level as usize - 1].push((spell.clone(), prepared));
                 }
             },
 
@@ -89,5 +89,21 @@ impl SpellList {
             }
             _ => panic!("Invalid spell level"),
         }
+    }
+
+    pub fn get_spell_by_name(&self, name: &str) -> Option<Spell> {
+        for spell in &self.cantrips {
+            if spell.0.name == name {
+                return Some(spell.0.clone());
+            }
+        }
+        for spell in &self.spells {
+            for spell in spell {
+                if spell.0.name == name {
+                    return Some(spell.0.clone());
+                }
+            }
+        }
+        None
     }
 }

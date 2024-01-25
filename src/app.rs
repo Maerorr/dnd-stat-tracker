@@ -6,7 +6,7 @@ use epaint::{Vec2, Rect, Pos2, Stroke};
 use serde_json::from_reader;
 use strum::IntoEnumIterator;
 
-use crate::{ui_widgets::{UiWidgets, self, centered_label, centered_heading}, dnd_logic::{prelude::*, spell}, ui::{self, stat_tracker_ui}};
+use crate::{ui_widgets::{UiWidgets, self, centered_label, centered_heading}, dnd_logic::{character, prelude::*, spell}, ui::*};
 
 //create global variable EDIT_MODE
 
@@ -74,6 +74,19 @@ fn load_spells_from_files() -> SpellList {
     }    spell_database
 }
 
+fn load_characters(spell_database: &SpellList) -> Vec<Character> {
+    let path = std::path::Path::new(CHARACTERS_PATH);
+    let mut characters = Vec::new();
+    for entry in std::fs::read_dir(path).unwrap() {
+        let entry = entry.unwrap();
+        let file = File::open(entry.path()).unwrap();
+        let mut character: Character = serde_json::from_reader(file).unwrap();
+        character.load_spells(spell_database);
+        characters.push(character);
+    }
+    characters
+}
+
 pub enum AppState {
     CharacterSelect,
     CharacterCreate,
@@ -96,6 +109,7 @@ impl Default for StatTracker {
         let def_char = Character::default();
 
         let spell_database = load_spells_from_files();
+        let saved_characters = load_characters(&spell_database);
 
         Self {
             state: AppState::StatTracker,
@@ -112,14 +126,7 @@ impl eframe::App for StatTracker {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         match self.state {
             AppState::CharacterSelect => {
-                egui::CentralPanel::default().show(ctx, |ui| {
-                    ui.heading("Character Select");
-                    ui.horizontal(|ui| {
-                        if ui.button("Create Character").clicked() {
-                            self.state = AppState::CharacterCreate;
-                        }
-                    });
-                });
+                character_select_ui(&ctx, self);
             }
             AppState::CharacterCreate => {
                 egui::CentralPanel::default().show(ctx, |ui| {
@@ -147,6 +154,8 @@ impl StatTracker {
         let spell_database = load_spells_from_files();
         let mut def_char = Character::test_character();
 
+        let characters = load_characters(&spell_database);
+
         // add all spells from spell database to character
         for spell in spell_database.cantrips.iter() {
             def_char.add_spell(&spell.0);
@@ -161,8 +170,8 @@ impl StatTracker {
         ui_widgets.set_spell_database(spell_database.clone());
 
         Self {
-            state: AppState::StatTracker,
-            characters: vec![def_char],
+            state: AppState::CharacterSelect,
+            characters: characters,
             current_character: 0,
             ui_widgets,
             first_frame: true,

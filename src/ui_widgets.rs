@@ -265,7 +265,7 @@ impl UiWidgets {
                                 if ui.button("-").clicked() {
                                     character.subtract_one_ac();
                                 }
-                                ui.label(character.armor_class.to_string());
+                                ui.label(character.base_armor_class.to_string());
                                 if ui.button("+").clicked() {
                                     character.add_one_ac();
                                 }
@@ -410,7 +410,7 @@ impl UiWidgets {
                 ui.columns(3, |columns| {
                     columns[0].set_width(80.0);
                     columns[0].vertical_centered(|ui| {
-                        ui.label(character.armor_class.to_string());
+                        ui.label(character.base_armor_class.to_string());
                         ui.label(RichText::new("Armor Class").size(14.0));
                     });
                     columns[1].set_width(80.0);
@@ -932,11 +932,15 @@ impl UiWidgets {
                         continue;
                     }
                     if ui.button(spell.0.name.to_string()).clicked() {
-                        character.spell_list.add_spell(&spell.0);
+                        character.spell_list.add_spell(&spell.0, false);
                     }
                 }
             });
         });
+    }
+
+    pub fn display_character_select_square(&mut self, ui: &mut egui::Ui, character: &mut Character) {
+        character_square(ui, character);
     }
 }
 
@@ -1026,3 +1030,25 @@ pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, (spell, prepared
     flag
 }
 
+pub fn character_square(ui: &mut egui::Ui, character: &mut Character) -> egui::Response{
+    // 1. SIZE OF THE WIDGET
+    let desired_size = Vec2::new(150.0, 150.0);
+
+    // 2. ALLOCATE SPACE FOR THE WIDGET
+    let (rect, mut response) = ui.allocate_at_least(desired_size, Sense::click());
+
+    // 3.
+    if response.clicked() {
+        response.mark_changed();
+    }
+
+    // 3. DRAW THE WIDGET
+    if ui.is_rect_visible(rect) {
+        let visuals = ui.style().interact(&response);
+
+        ui.painter().rect_filled(rect, 5.0, MAIN_COLOR);
+        ui.label(character.name.to_string());
+    }
+
+    response
+}

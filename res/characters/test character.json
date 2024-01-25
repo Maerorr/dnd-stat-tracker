@@ -3,7 +3,7 @@
   "level": 5,
   "class": "Barbarian",
   "experience": 6500,
-  "armor_class": 10,
+  "base_armor_class": 10,
   "initiative_bonus": 0,
   "speed": 30,
   "maximum_hit_points": 55,
@@ -196,26 +196,70 @@
     "gold": 0,
     "platinum": 0
   },
-  "spell_names": [
-    "Control Flames",
-    "Sapping Sting",
-    "Fire Bolt",
-    "Dancing Lights",
-    "Magic Missile",
-    "Shield",
-    "Burning Hands",
-    "Disguise Self",
-    "Charm Person",
-    "Find Familiar",
-    "Flaming Sphere",
-    "Maximillian's Earthen Grasp",
-    "Knock",
-    "Extreme flaming sphere",
-    "super extra Flaming Sphere",
-    "deal dmg spell",
-    "fire blowww",
-    "extreme 7th lvl spell",
-    "spicy fire explosion",
-    "the biggest blow"
+  "spell_serialization_data": [
+    [
+      "Magic Missile",
+      false
+    ],
+    [
+      "Shield",
+      false
+    ],
+    [
+      "Burning Hands",
+      false
+    ],
+    [
+      "Disguise Self",
+      false
+    ],
+    [
+      "Charm Person",
+      false
+    ],
+    [
+      "Find Familiar",
+      false
+    ],
+    [
+      "Flaming Sphere",
+      false
+    ],
+    [
+      "Maximillian's Earthen Grasp",
+      false
+    ],
+    [
+      "Knock",
+      false
+    ],
+    [
+      "Extreme flaming sphere",
+      false
+    ],
+    [
+      "super extra Flaming Sphere",
+      false
+    ],
+    [
+      "deal dmg spell",
+      false
+    ],
+    [
+      "fire blowww",
+      false
+    ],
+    [
+      "extreme 7th lvl spell",
+      false
+    ],
+    [
+      "spicy fire explosion",
+      false
+    ],
+    [
+      "the biggest blow",
+      false
+    ]
   ]
 }

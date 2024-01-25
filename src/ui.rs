@@ -5,6 +5,36 @@ use epaint::{Vec2, Pos2, Stroke};
 
 use crate::{dnd_logic::prelude::*, app::{StatTracker, EDIT_MODE, AppState}};
 
+pub fn character_select_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
+    egui::CentralPanel::default().show(ctx, |ui| {
+        ui.vertical_centered(|ui| {
+            ui.heading("Character Select");
+        });
+
+        ui.vertical_centered(|ui| {
+            ui.add_space(15.0);
+            egui::Grid::new("character_grid")
+            .min_col_width(100.0)
+            .min_row_height(100.0)
+            .show(ui, |ui| {
+                for (idx, character) in stat_tracker.characters.iter_mut().enumerate() {
+                    let (rect, response) = ui.allocate_at_least(Vec2::new(100.0, 100.0), Sense::hover());
+                    stat_tracker.ui_widgets.display_character_select_square(ui, character);
+
+                    if response.clicked() {
+                        stat_tracker.current_character = idx;
+                        stat_tracker.state = AppState::StatTracker;
+                    }
+
+                    ui.end_row();
+                }
+            
+            });
+        });
+    });
+
+}
+
 pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
     egui::CentralPanel::default().show(ctx, |ui| {
         //create a top panel

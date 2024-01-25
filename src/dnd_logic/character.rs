@@ -11,7 +11,7 @@ pub struct Character {
     pub class: Class,
 
     pub experience: i32,
-    pub armor_class: i32,
+    pub base_armor_class: i32,
     pub initiative_bonus: i32,
     pub speed: i32,
 
@@ -34,7 +34,7 @@ pub struct Character {
     #[serde(skip)]
     pub spell_list: SpellList,
 
-    spell_names: Vec<String>,
+    spell_serialization_data: Vec<(String, bool)>,
 }
 
 impl Default for Character {
@@ -47,7 +47,7 @@ impl Default for Character {
             level: 1,
             class: class,
             experience: 0,
-            armor_class: 10,
+            base_armor_class: 10,
             initiative_bonus: 0,
             speed: 30,
             maximum_hit_points: 1,
@@ -63,7 +63,7 @@ impl Default for Character {
             skills: Skills::default(),
             money: Money::default(),
             spell_list: SpellList::default(),
-            spell_names: Vec::new(),
+            spell_serialization_data: Vec::new(),
         }
     }
 }
@@ -128,14 +128,14 @@ impl Character {
     }
 
     pub fn add_one_ac(&mut self) {
-        self.armor_class += 1;
+        self.base_armor_class += 1;
     }
 
     pub fn subtract_one_ac(&mut self) {
-        if self.armor_class <= 0 {
+        if self.base_armor_class <= 0 {
             return;
         }
-        self.armor_class -= 1;
+        self.base_armor_class -= 1;
     }
 
     pub fn add_one_initiative(&mut self) {
@@ -273,14 +273,33 @@ impl Character {
     }
 
     pub fn add_spell(&mut self, spell:&Spell) {
-        self.spell_names.push(spell.name.clone());
-        self.spell_list.add_spell(&spell);
+        self.spell_list.add_spell(&spell, false);
     }
 
-    pub fn save_to_file(&self) {
+    pub fn save_to_file(&mut self) {
+        // copy all spell names and prepared value to spell_serialization_data
+        self.spell_serialization_data.clear();
+        for spells in &self.spell_list.spells {
+            for spell in spells {
+                self.spell_serialization_data.push((spell.0.name.clone(), spell.1));
+            }
+        }
+        
         let file_name = format!("{}.{}", self.name,"json");
-        let mut file = File::create(CHARACTERS_PATH.to_string() + &file_name).unwrap();
+        let mut path = std::path::Path::new(CHARACTERS_PATH);
+        let mut file = File::create(path.join(file_name)).unwrap();
         let json = serde_json::to_string_pretty(self).unwrap();
         file.write_all(json.as_bytes()).unwrap();
+    }
+
+    pub fn load_spells(&mut self, spell_database: &SpellList) {
+        for (spell_name, prepared) in self.spell_serialization_data.iter() {
+            let spell = spell_database.get_spell_by_name(spell_name);
+            if spell.is_none() {
+                continue;
+            }
+            let spell = spell.unwrap();
+            self.spell_list.add_spell(&spell, *prepared);
+        }
     }
 }
