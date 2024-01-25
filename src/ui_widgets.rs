@@ -1,7 +1,7 @@
 use std::collections::btree_map::Range;
 
-use egui::{style::Spacing, Align, Layout, RichText, Sense};
-use epaint::{Vec2, Stroke, Pos2, Rounding};
+use egui::{style::Spacing, Align, Align2, Layout, RichText, Sense};
+use epaint::{FontId, Pos2, Rect, Rounding, Stroke, Vec2};
 use strum::IntoEnumIterator;
 
 use crate::{app::*, dnd_logic::{prelude::*, spell}};
@@ -939,8 +939,8 @@ impl UiWidgets {
         });
     }
 
-    pub fn display_character_select_square(&mut self, ui: &mut egui::Ui, character: &mut Character) {
-        character_square(ui, character);
+    pub fn display_character_select_square(&mut self, ui: &mut egui::Ui, character: &mut Character) -> egui::Response {
+        character_square(ui, character)
     }
 }
 
@@ -1031,23 +1031,63 @@ pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, (spell, prepared
 }
 
 pub fn character_square(ui: &mut egui::Ui, character: &mut Character) -> egui::Response{
+    let mut hovered = false;
+    
     // 1. SIZE OF THE WIDGET
-    let desired_size = Vec2::new(150.0, 150.0);
+    let desired_size = Vec2::new(230.0, 120.0);
 
     // 2. ALLOCATE SPACE FOR THE WIDGET
     let (rect, mut response) = ui.allocate_at_least(desired_size, Sense::click());
 
-    // 3.
+    // 3. CHECK INTERACTION
     if response.clicked() {
         response.mark_changed();
+    }
+
+    if response.hovered() {
+        hovered = true;
     }
 
     // 3. DRAW THE WIDGET
     if ui.is_rect_visible(rect) {
         let visuals = ui.style().interact(&response);
 
-        ui.painter().rect_filled(rect, 5.0, MAIN_COLOR);
-        ui.label(character.name.to_string());
+        ui.painter().rect_filled(rect, 5.0, egui::Color32::from_gray(40));
+        if hovered {
+            ui.painter().rect_stroke(rect, 5.0, Stroke::new(4.0, egui::Color32::from_gray(220)));
+        } else {
+            ui.painter().rect_stroke(rect, 5.0, Stroke::new(2.0, MAIN_COLOR));
+        }
+        
+        // place three labels inside of rect. With character name, class and level
+        // make three rect values each being a vertical 1/3 of the base rect
+        let name_rect = Rect::from_min_size(rect.min, Vec2::new(rect.width(), rect.height() / 3.0));
+        let class_rect = Rect::from_min_size(Pos2::new(rect.min.x, rect.min.y + name_rect.height()), Vec2::new(rect.width(), rect.height() / 3.0));
+        let level_rect = Rect::from_min_size(Pos2::new(rect.min.x, rect.min.y + name_rect.height() + class_rect.height()), Vec2::new(rect.width(), rect.height() / 3.0));
+        
+        ui.painter().text(
+            name_rect.center(),
+            Align2::CENTER_CENTER,
+            character.name.to_string(),
+            FontId::default(),
+            egui::Color32::WHITE
+        );
+
+        ui.painter().text(
+            class_rect.center(),
+            Align2::CENTER_CENTER,
+            format!("{}", character.class.get_name()),
+            FontId::default(),
+            egui::Color32::WHITE
+        );
+
+        ui.painter().text(
+            level_rect.center(),
+            Align2::CENTER_CENTER,
+            format!("Level {}", character.level),
+            FontId::default(),
+            egui::Color32::WHITE
+        );
     }
 
     response

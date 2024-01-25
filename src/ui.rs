@@ -7,30 +7,53 @@ use crate::{dnd_logic::prelude::*, app::{StatTracker, EDIT_MODE, AppState}};
 
 pub fn character_select_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
     egui::CentralPanel::default().show(ctx, |ui| {
-        ui.vertical_centered(|ui| {
-            ui.heading("Character Select");
-        });
-
-        ui.vertical_centered(|ui| {
-            ui.add_space(15.0);
-            egui::Grid::new("character_grid")
-            .min_col_width(100.0)
-            .min_row_height(100.0)
-            .show(ui, |ui| {
-                for (idx, character) in stat_tracker.characters.iter_mut().enumerate() {
-                    let (rect, response) = ui.allocate_at_least(Vec2::new(100.0, 100.0), Sense::hover());
-                    stat_tracker.ui_widgets.display_character_select_square(ui, character);
-
-                    if response.clicked() {
-                        stat_tracker.current_character = idx;
-                        stat_tracker.state = AppState::StatTracker;
-                    }
-
-                    ui.end_row();
-                }
-            
+        
+        egui::TopBottomPanel::top("character_select_top_panel")
+        .min_height(64.0)
+        .show_inside(ui, |ui| {
+            ui.vertical_centered(|ui| {
+                ui.heading("Character Select");
             });
         });
+
+        egui::SidePanel::left("character_select_left_panel")
+        .exact_width(200.0)
+        .resizable(false)
+        .show_inside(ui, |ui| {
+        });
+
+        egui::SidePanel::right("character_select_right_panel")
+        .exact_width(200.0)
+        .resizable(false)
+        .show_inside(ui, |ui| {
+        });
+
+        egui::CentralPanel::default()
+        .show_inside(ui, |ui| {
+            ui.vertical_centered(|ui| {
+                ui.add_space(15.0);
+                // split characters into slices of up to 5 characters each
+                let mut up_to_five_characters = stat_tracker.characters.chunks_mut(5).collect::<Vec<_>>();
+                let mut count = 0;
+    
+                for char in up_to_five_characters.iter_mut() {  
+                    ui.horizontal(|ui| {
+                        ui.add_space(10.0);
+                        for character in char.iter_mut() {
+                            let response = stat_tracker.ui_widgets.display_character_select_square(ui, character);
+    
+                            if response.clicked() {
+                                stat_tracker.current_character = count;
+                                stat_tracker.state = AppState::StatTracker;
+                            }
+                            count +=1;
+                        }
+                    });
+                }                
+            });
+        });
+        
+       
     });
 
 }
@@ -60,11 +83,14 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
                                 stat_tracker.first_frame = true;
                             }
                         } else {
-                            let (but_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 30.0), Sense::hover());
-                            let edit_button_response = ui.put(but_rect, egui::Button::new("Edit").min_size(Vec2::new(90.0, 30.0)));
+                            let (but_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 36.0), Sense::hover());
+                            let edit_button_response = ui.put(but_rect, egui::Button::new("Edit").min_size(Vec2::new(90.0, 36.0)));
 
-                            let (save_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 30.0), Sense::hover());
-                            let save_button_response = ui.put(save_rect, egui::Button::new("Save").min_size(Vec2::new(90.0, 30.0)));
+                            let (save_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 36.0), Sense::hover());
+                            let save_button_response = ui.put(save_rect, egui::Button::new("Save").min_size(Vec2::new(90.0, 36.0)));
+
+                            let (champ_select_rect, _) = ui.allocate_at_least(Vec2::new(150.0, 36.0), Sense::hover());
+                            let champ_select_button_response = ui.put(champ_select_rect, egui::Button::new("Save & Switch to Character Select").min_size(Vec2::new(150.0, 36.0)));
 
                             if save_button_response.clicked() {
                                 stat_tracker.characters[stat_tracker.current_character].save_to_file();
@@ -74,6 +100,11 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
                                 stat_tracker.state = AppState::StatTrackerEdit;
                                 unsafe { EDIT_MODE = true };
                                 stat_tracker.first_frame = true;
+                            }
+
+                            if champ_select_button_response.clicked() {
+                                stat_tracker.characters[stat_tracker.current_character].save_to_file();
+                                stat_tracker.state = AppState::CharacterSelect;
                             }
                         }
                             

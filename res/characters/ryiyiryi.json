@@ -1,0 +1,265 @@
+{
+  "name": "ryiyiryi",
+  "level": 5,
+  "class": "Barbarian",
+  "experience": 6500,
+  "base_armor_class": 10,
+  "initiative_bonus": 0,
+  "speed": 30,
+  "maximum_hit_points": 55,
+  "current_hit_points": 55,
+  "temporary_hit_points": 15,
+  "hit_dice_total": {
+    "sides": 12,
+    "count": 5
+  },
+  "hit_dice_used": {
+    "sides": 12,
+    "count": 0
+  },
+  "death_saves": {
+    "successes": 0,
+    "failures": 0
+  },
+  "inspiration": false,
+  "proficiency_bonus": 3,
+  "stats": {
+    "strength": {
+      "stat": "Strength",
+      "value": 18,
+      "modifier": 4,
+      "saving_throw_proficiency": false
+    },
+    "dexterity": {
+      "stat": "Dexterity",
+      "value": 16,
+      "modifier": 3,
+      "saving_throw_proficiency": true
+    },
+    "constitution": {
+      "stat": "Constitution",
+      "value": 14,
+      "modifier": 2,
+      "saving_throw_proficiency": false
+    },
+    "intelligence": {
+      "stat": "Intelligence",
+      "value": 12,
+      "modifier": 1,
+      "saving_throw_proficiency": true
+    },
+    "wisdom": {
+      "stat": "Wisdom",
+      "value": 10,
+      "modifier": 0,
+      "saving_throw_proficiency": false
+    },
+    "charisma": {
+      "stat": "Charisma",
+      "value": 8,
+      "modifier": -1,
+      "saving_throw_proficiency": true
+    }
+  },
+  "skills": {
+    "acrobatics": {
+      "base_ability": "Dexterity",
+      "skill_type": "Acrobatics",
+      "proficiency": true,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "animal_handling": {
+      "base_ability": "Wisdom",
+      "skill_type": "AnimalHandling",
+      "proficiency": true,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "arcana": {
+      "base_ability": "Intelligence",
+      "skill_type": "Arcana",
+      "proficiency": true,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "athletics": {
+      "base_ability": "Strength",
+      "skill_type": "Athletics",
+      "proficiency": true,
+      "expertise": true,
+      "other_bonus": 0
+    },
+    "deception": {
+      "base_ability": "Charisma",
+      "skill_type": "Deception",
+      "proficiency": true,
+      "expertise": true,
+      "other_bonus": 0
+    },
+    "history": {
+      "base_ability": "Intelligence",
+      "skill_type": "History",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "insight": {
+      "base_ability": "Wisdom",
+      "skill_type": "Insight",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "intimidation": {
+      "base_ability": "Charisma",
+      "skill_type": "Intimidation",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "investigation": {
+      "base_ability": "Intelligence",
+      "skill_type": "Investigation",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "medicine": {
+      "base_ability": "Wisdom",
+      "skill_type": "Medicine",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "nature": {
+      "base_ability": "Intelligence",
+      "skill_type": "Nature",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "perception": {
+      "base_ability": "Wisdom",
+      "skill_type": "Perception",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "performance": {
+      "base_ability": "Charisma",
+      "skill_type": "Performance",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "persuasion": {
+      "base_ability": "Charisma",
+      "skill_type": "Persuasion",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "religion": {
+      "base_ability": "Intelligence",
+      "skill_type": "Religion",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 10
+    },
+    "sleight_of_hand": {
+      "base_ability": "Dexterity",
+      "skill_type": "SleightOfHand",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "stealth": {
+      "base_ability": "Dexterity",
+      "skill_type": "Stealth",
+      "proficiency": false,
+      "expertise": false,
+      "other_bonus": 0
+    },
+    "survival": {
+      "base_ability": "Wisdom",
+      "skill_type": "Survival",
+      "proficiency": true,
+      "expertise": false,
+      "other_bonus": 0
+    }
+  },
+  "money": {
+    "copper": 123,
+    "silver": 534,
+    "electrum": 7645,
+    "gold": 0,
+    "platinum": 11
+  },
+  "spell_serialization_data": [
+    [
+      "Magic Missile",
+      false
+    ],
+    [
+      "Shield",
+      false
+    ],
+    [
+      "Burning Hands",
+      false
+    ],
+    [
+      "Disguise Self",
+      false
+    ],
+    [
+      "Charm Person",
+      false
+    ],
+    [
+      "Find Familiar",
+      false
+    ],
+    [
+      "Flaming Sphere",
+      false
+    ],
+    [
+      "Maximillian's Earthen Grasp",
+      false
+    ],
+    [
+      "Knock",
+      false
+    ],
+    [
+      "Extreme flaming sphere",
+      false
+    ],
+    [
+      "super extra Flaming Sphere",
+      false
+    ],
+    [
+      "deal dmg spell",
+      false
+    ],
+    [
+      "fire blowww",
+      false
+    ],
+    [
+      "extreme 7th lvl spell",
+      false
+    ],
+    [
+      "spicy fire explosion",
+      false
+    ],
+    [
+      "the biggest blow",
+      false
+    ]
+  ]
+}

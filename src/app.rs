@@ -87,6 +87,8 @@ fn load_characters(spell_database: &SpellList) -> Vec<Character> {
     characters
 }
 
+
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum AppState {
     CharacterSelect,
     CharacterCreate,
@@ -96,6 +98,7 @@ pub enum AppState {
 
 pub struct StatTracker {
     pub state: AppState,
+    pub previous_state: AppState,
     pub characters: Vec<Character>,
     pub current_character: usize, // index of current character in characters
     pub ui_widgets: UiWidgets,
@@ -112,7 +115,8 @@ impl Default for StatTracker {
         let saved_characters = load_characters(&spell_database);
 
         Self {
-            state: AppState::StatTracker,
+            state: AppState::CharacterSelect,
+            previous_state: AppState::CharacterSelect,
             characters: vec![def_char],
             current_character: 0,
             ui_widgets: UiWidgets::default(),
@@ -126,6 +130,11 @@ impl eframe::App for StatTracker {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         match self.state {
             AppState::CharacterSelect => {
+                if self.previous_state != AppState::CharacterSelect {
+                    self.previous_state = AppState::CharacterSelect;
+                    self.characters.clear();
+                    self.characters = load_characters(&self.spell_database);
+                }
                 character_select_ui(&ctx, self);
             }
             AppState::CharacterCreate => {
@@ -137,12 +146,15 @@ impl eframe::App for StatTracker {
                         }
                     });
                 });
+                self.previous_state = AppState::CharacterCreate;
             }
             AppState::StatTracker => {
                 stat_tracker_ui(&ctx, self);
+                self.previous_state = AppState::StatTracker;
             },
             AppState::StatTrackerEdit => {
                 stat_tracker_ui(&ctx, self);
+                self.previous_state = AppState::StatTrackerEdit;
             }
         }
     }
@@ -171,6 +183,7 @@ impl StatTracker {
 
         Self {
             state: AppState::CharacterSelect,
+            previous_state: AppState::CharacterSelect,
             characters: characters,
             current_character: 0,
             ui_widgets,
