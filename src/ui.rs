@@ -1,9 +1,11 @@
 use std::fmt::format;
 
-use egui::{Context, Ui, Align, Sense};
-use epaint::{Vec2, Pos2, Stroke};
+use eframe::App;
+use egui::{Align, Align2, Context, RichText, Sense, Ui};
+use epaint::{FontId, Pos2, Stroke, Vec2};
+use serde::de;
 
-use crate::{dnd_logic::prelude::*, app::{StatTracker, EDIT_MODE, AppState}};
+use crate::{app::{AppState, StatTracker, EDIT_MODE, MAIN_COLOR}, dnd_logic::prelude::*, ui_widgets::draw_horizontal_line_at_least};
 
 pub fn character_select_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
     egui::CentralPanel::default().show(ctx, |ui| {
@@ -65,8 +67,13 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
         .min_height(64.0)
         .show_inside(ui, |ui| {
             ui.vertical(|ui| {
-                ui.vertical_centered(|ui| {
-                    ui.heading("Stat Tracker");
+                // ui.vertical_centered(|ui| {
+                //     ui.heading("Stat Tracker");
+                // });
+                ui.horizontal(|ui|{
+                    ui.with_layout(egui::Layout::centered_and_justified(egui::Direction::TopDown), |ui| {
+                        ui.heading("Stat Tracker");
+                    });
                 });
 
                 ui.horizontal(|ui| {
@@ -74,8 +81,8 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
 
                     ui.with_layout(egui::Layout::right_to_left(Align::RIGHT), |ui| {
                         if unsafe {EDIT_MODE} {
-                            let (but_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 30.0), Sense::hover());
-                            let edit_button_response = ui.put(but_rect, egui::Button::new("Stop Editing").min_size(Vec2::new(90.0, 30.0)));
+                            let (but_rect, _) = ui.allocate_at_least(Vec2::new(90.0, 36.0), Sense::hover());
+                            let edit_button_response = ui.put(but_rect, egui::Button::new("Stop Editing").min_size(Vec2::new(90.0, 36.0)));
 
                             if edit_button_response.clicked() {
                                 stat_tracker.state = AppState::StatTracker;
@@ -122,7 +129,7 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
         .resizable(false)
         .show_inside(ui, |ui| {
             ui.horizontal(|ui| {
-                ui.add_space(15.0);
+                //ui.add_space(15.0);
                 stat_tracker.stats_ui(ui);
                 ui.add_space(10.0);
 
@@ -173,6 +180,34 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
         .resizable(false)
         .show_inside(ui, |ui| {
             ui.horizontal(|ui| {
+
+                ui.vertical(|ui| {
+                    // i couldn't center it without breaking the layout 💀
+                    ui.label("                   Features & Traits");
+                    
+                    let text_split = stat_tracker.characters[stat_tracker.current_character].features_and_traits.split("\n").collect::<Vec<_>>();
+                    for text in text_split.iter() {
+                        ui.horizontal_wrapped(|ui| {
+                            if text.is_empty() {
+                                draw_horizontal_line_at_least(ui, Vec2::new(250.0, 0.0), MAIN_COLOR);
+                            } else {
+                                ui.set_max_width(300.0);
+                                ui.add(egui::Label::new(RichText::new(*text).size(14.0)));
+                            }
+                        });
+                    }
+                });
+
+                let (rect, _response) = ui.allocate_at_least(Vec2::new(2.0, 1500.0), Sense::hover());
+
+                ui.painter().line_segment(
+                    [Pos2::new(rect.left(), rect.top()), Pos2::new(rect.left(), rect.bottom())], 
+                    Stroke::new(
+                        1.0, 
+                        egui::Color32::from_gray(60)
+                    )
+                );
+                
                 //ui.add_space(15.0);
                 ui.vertical_centered(|ui| {
                     ui.heading("todo: switch button for spells/eq");

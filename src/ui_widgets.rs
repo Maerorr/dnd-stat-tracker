@@ -1,7 +1,7 @@
 use std::collections::btree_map::Range;
 
-use egui::{style::Spacing, Align, Align2, Layout, RichText, Sense};
-use epaint::{FontId, Pos2, Rect, Rounding, Stroke, Vec2};
+use egui::{style::Spacing, Align, Align2, Layout, Response, RichText, Sense};
+use epaint::{Color32, FontId, Pos2, Rect, Rounding, Stroke, Vec2};
 use strum::IntoEnumIterator;
 
 use crate::{app::*, dnd_logic::{prelude::*, spell}};
@@ -67,19 +67,23 @@ impl UiWidgets {
             });
             ui.end_row();
             ui.centered_and_justified(|ui| {
-                ui.label(format!("{} ({})", stat.get_value(), stat.get_modifier()));
+                if unsafe { EDIT_MODE } {
+                    ui.horizontal(|ui|{
+                        ui.label(format!("{} ({})", stat.get_value(), stat.get_modifier()));
+                        let sub_resp = ui.add(egui::Button::new("-"));
+                        if sub_resp.clicked() {
+                            stat.subtract_one();
+                        }
+        
+                        let add_resp = ui.add(egui::Button::new("+"));
+                        if add_resp.clicked() {
+                            stat.add_one();
+                        }
+                    });
+                } else {
+                    ui.label(format!("{} ({})", stat.get_value(), stat.get_modifier()));
+                }
             });
-            if unsafe { EDIT_MODE } {
-                let sub_resp = ui.add(egui::Button::new("-"));
-                if sub_resp.clicked() {
-                    stat.subtract_one();
-                }
-
-                let add_resp = ui.add(egui::Button::new("+"));
-                if add_resp.clicked() {
-                    stat.add_one();
-                }
-            }
         });
     }
 
@@ -180,7 +184,8 @@ impl UiWidgets {
                     let mut prof = character.stats.get_stat_saving_throw_proficiency(stat);
 
                     if unsafe {EDIT_MODE} {
-                        ui.checkbox(&mut prof, " ");
+                        //ui.checkbox(&mut prof, " ");
+                        small_checkbox(ui, &mut prof);
 
                         character.stats.set_save_proficiency(stat, prof);
                     } else {
@@ -207,10 +212,8 @@ impl UiWidgets {
         .min_col_width(1.0)
         .show(ui, |ui| {
             for skill in SkillType::iter() {
-                
                 // paint a filled circle if yes, empty circle if no
-                let (rect, _response) = ui.allocate_at_least(Vec2::new(10.0, 10.0), Sense::hover());
-
+            
                 // is proficient?
                 let mut prof = character.skills.get_skill_proficiency(skill);
                 // has expertise?
@@ -222,16 +225,24 @@ impl UiWidgets {
                 let bonus = skill_mod + character.proficiency_bonus * prof as i32 + character.proficiency_bonus * expert as i32 + other_bonus;
                 let sign = if bonus > 0 { "+" } else { "" };
                 if unsafe {EDIT_MODE} {
-                    ui.checkbox(&mut prof, " ");
+                    //ui.checkbox(&mut prof, " ");
+                    small_checkbox(ui, &mut prof);
                     character.skills.set_skill_proficiency(skill, prof);
 
                     ui.label(RichText::new(format!("({}{})", sign, bonus)));
                     ui.label(skill.get_name());
                     ui.colored_label(egui::Color32::from_gray(100), RichText::new(format!("({})", skill.get_base_stat().get_short_name())).size(10.0));
-                    ui.checkbox(&mut expert, "");
+                    //ui.checkbox(&mut expert, "");
+                    small_checkbox(ui, &mut expert);
                     character.skills.set_skill_expertise(skill, expert);
-
                 } else {
+                    if prof {
+                        let (rect, _response) = ui.allocate_at_least(Vec2::new(12.0, 12.0), Sense::hover());
+                        ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
+                    } else {
+                        let (rect, _response) = ui.allocate_at_least(Vec2::new(12.0, 12.0), Sense::hover());
+                        ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
+                    }
                     // proficiency sombol using empty or filled circle
                     ui.label(RichText::new(format!("({}{})", sign, bonus)));
                     ui.label(RichText::new(format!("{}", skill.get_name())));
@@ -239,11 +250,7 @@ impl UiWidgets {
                     if expert {
                         ui.label("e");
                     }
-                    if prof {
-                        ui.painter().circle_filled(rect.center(), 5.0, egui::Color32::from_rgb(255, 255, 255));
-                    } else {
-                        ui.painter().circle_stroke(rect.center(), 5.0, Stroke::new(1.0, egui::Color32::from_rgb(255, 255, 255)));
-                    }
+                    
                 }
                 
                 ui.end_row();
@@ -1000,7 +1007,8 @@ pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, (spell, prepared
         ui.horizontal(|ui| {
             ui.with_layout(Layout::left_to_right(Align::LEFT), |ui| {
                 if unsafe {EDIT_MODE} {
-                    ui.checkbox(prepared, "");
+                    //ui.checkbox(prepared, "");
+                    small_checkbox(ui, prepared);
                 } else {
                     if *prepared {
                         draw_circle_filled(ui, Vec2::new(12.0, 14.0), 5.0, MAIN_COLOR);
@@ -1088,6 +1096,46 @@ pub fn character_square(ui: &mut egui::Ui, character: &mut Character) -> egui::R
             FontId::default(),
             egui::Color32::WHITE
         );
+    }
+
+    response
+}
+
+fn small_checkbox(ui: &mut egui::Ui, checked: &mut bool) -> Response {
+    let mut response = ui.allocate_response(Vec2::new(12.0, 12.0), Sense::click());
+    let visuals = ui.style().interact(&response);
+    let rect = response.rect;
+    let center = rect.center();
+
+    ui.painter().rect_filled(rect, 2.0, Color32::from_gray(60));
+    ui.painter().rect_stroke(rect, 2.0, Stroke::new(1.0, MAIN_COLOR));
+
+    let c = rect.center();
+    let w = (rect.width() / 2.0) * 0.6;
+    let h = (rect.height() / 2.0) * 0.6;
+
+    if *checked {
+        let radius = 1.0;
+        // draw an X symbol using ui.painter.line_segment
+        ui.painter().line_segment(
+            [Pos2::new(c.x - w, c.y - h), Pos2::new(c.x + w, c.y + h)], 
+            Stroke::new(
+                radius, 
+                Color32::from_gray(200)
+            )
+        );
+        ui.painter().line_segment(
+            [Pos2::new(c.x - w, c.y + h), Pos2::new(c.x + w, c.y - h)], 
+            Stroke::new(
+                radius, 
+                Color32::from_gray(200)
+            )
+        );
+    }
+
+    if response.clicked() {
+        *checked = !*checked;
+        response.mark_changed();
     }
 
     response
