@@ -928,15 +928,22 @@ impl UiWidgets {
         egui::Window::new(format!("Add Spell Level {}", lvl))
         .open(&mut self.display_add_spell_window)
         .show(ui.ctx(), |ui| {
-            ui.vertical(|ui| {
-                for spell in spells_of_lvl {
-                    if character.spell_list.get_spells_of_level(lvl).contains(&spell) {
-                        continue;
+            // split spells into two halfs, and display in two columns
+            ui.columns(2, |columns| {
+                columns[0].vertical(|ui| {
+                    for (spell, _) in spells_of_lvl.iter().take(spells_of_lvl.len() / 2) {
+                        if ui.button(spell.name.clone()).clicked() {
+                            character.add_spell(spell);
+                        }
                     }
-                    if ui.button(spell.0.name.to_string()).clicked() {
-                        character.add_spell(&spell.0);
+                });
+                columns[1].vertical(|ui| {
+                    for (spell, _) in spells_of_lvl.iter().skip(spells_of_lvl.len() / 2) {
+                        if ui.button(spell.name.clone()).clicked() {
+                            character.add_spell(spell);
+                        }
                     }
-                }
+                });
             });
         });
     }

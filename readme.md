@@ -19,3 +19,5 @@ TODO:
 
 How it looks currently:
 ![image](images/dndstattracker.png)
+
+All spells are from [here](https://github.com/jcquinlan/dnd-spells), reformatted for my own use.

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
-use super::dice::Dice;
+use super::{dice::Dice, stat_type::StatType};
 
 #[derive(Debug, EnumIter, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Class {
@@ -17,6 +17,9 @@ pub enum Class {
     Sorcerer,
     Warlock,
     Wizard,
+    Artificer,
+    BloodHunter,
+    Gunslinger,
 }
 
 impl Class {
@@ -34,6 +37,9 @@ impl Class {
             Class::Sorcerer => Dice::new(6, 1),
             Class::Warlock => Dice::new(8, 1),
             Class::Wizard => Dice::new(6, 1),
+            Class::Artificer => Dice::new(8, 1),
+            Class::BloodHunter => Dice::new(10, 1),
+            Class::Gunslinger => Dice::new(10, 1),
         }
     }
 
@@ -51,6 +57,29 @@ impl Class {
             Class::Sorcerer => String::from("Sorcerer"),
             Class::Warlock => String::from("Warlock"),
             Class::Wizard => String::from("Wizard"),
+            Class::Artificer => String::from("Artificer"),
+            Class::BloodHunter => String::from("Blood Hunter"),
+            Class::Gunslinger => String::from("Gunslinger"),
+        }
+    }
+
+    pub fn get_spellcasting_ability(&self) -> Option<StatType> {
+        match self {
+            Class::Barbarian => None,
+            Class::Bard => Some(StatType::Charisma),
+            Class::Cleric => Some(StatType::Wisdom),
+            Class::Druid => Some(StatType::Wisdom),
+            Class::Fighter => None,
+            Class::Monk => None,
+            Class::Paladin => Some(StatType::Charisma),
+            Class::Ranger => Some(StatType::Wisdom),
+            Class::Rogue => None,
+            Class::Sorcerer => Some(StatType::Charisma),
+            Class::Warlock => Some(StatType::Charisma),
+            Class::Wizard => Some(StatType::Intelligence),
+            Class::Artificer => Some(StatType::Intelligence),
+            Class::BloodHunter => Some(StatType::Wisdom),
+            Class::Gunslinger => Some(StatType::Wisdom),
         }
     }
 
