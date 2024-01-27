@@ -5,7 +5,7 @@ use egui::{Align, Align2, Context, RichText, Sense, Ui};
 use epaint::{FontId, Pos2, Stroke, Vec2};
 use serde::de;
 
-use crate::{app::{AppState, StatTracker, EDIT_MODE, MAIN_COLOR}, dnd_logic::prelude::*, ui_widgets::draw_horizontal_line_at_least};
+use crate::{app::{AppState, StatTracker, EDIT_MODE, MAIN_COLOR}, dnd_logic::{prelude::*, spell}, ui_widgets::{draw_horizontal_line_at_least, draw_vertical_line_at_least}};
 
 pub fn character_select_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
     egui::CentralPanel::default().show(ctx, |ui| {
@@ -67,9 +67,7 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
         .min_height(64.0)
         .show_inside(ui, |ui| {
             ui.vertical(|ui| {
-                // ui.vertical_centered(|ui| {
-                //     ui.heading("Stat Tracker");
-                // });
+
                 ui.horizontal(|ui|{
                     ui.with_layout(egui::Layout::centered_and_justified(egui::Direction::TopDown), |ui| {
                         ui.heading("Stat Tracker");
@@ -211,7 +209,40 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
                 //ui.add_space(15.0);
                 ui.vertical_centered(|ui| {
                     ui.horizontal(|ui|{
-                        ui.label(RichText::new(""))
+                        let char = &mut stat_tracker.characters[stat_tracker.current_character];
+                        let ability = char.get_class().get_spellcasting_ability();
+                        let spellcasting_ability = if ability.is_some() {
+                            char.get_class().get_spellcasting_ability().unwrap().get_short_name()
+                        } else {
+                            "None".to_string()
+                        };
+                        let spell_save_dc = if ability.is_some() {
+                            let num = 8 + char.stats.get_stat_modifier(ability.unwrap()) + char.proficiency_bonus;
+                            num.to_string()
+                        } else {
+                            "None".to_string()
+                        };
+
+                        let spell_attack_bonus = if ability.is_some() {
+                            let num = char.proficiency_bonus + char.stats.get_stat_modifier(ability.unwrap());
+                            num.to_string()
+                        } else {
+                            "None".to_string()
+                        };
+
+                        let color = if ability.is_some() {
+                            ability.unwrap().get_stat_color()
+                        } else {
+                            MAIN_COLOR
+                        };
+                        ui.label(RichText::new(format!("Spellcasting Ability: {}", spellcasting_ability)).color(color));
+                        draw_vertical_line_at_least(ui, Vec2::new(0.0, 18.0), MAIN_COLOR);
+
+                        ui.label(RichText::new(format!("Spell Save DC: {}", spell_save_dc)).color(color));
+                        draw_vertical_line_at_least(ui, Vec2::new(0.0, 18.0), MAIN_COLOR);
+
+                        ui.label(RichText::new(format!("Spell Attack Bonus: {}", spell_attack_bonus)).color(color));
+                        draw_vertical_line_at_least(ui, Vec2::new(0.0, 18.0), MAIN_COLOR);
                     });
                     ui.heading("todo: switch button for spells/eq");
                     stat_tracker.ui_widgets.display_spell_list(ctx, ui, &mut stat_tracker.characters[stat_tracker.current_character]);

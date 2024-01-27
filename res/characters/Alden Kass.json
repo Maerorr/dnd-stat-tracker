@@ -1,20 +1,20 @@
 {
-  "name": "test character",
-  "level": 5,
-  "class": "Barbarian",
-  "experience": 6500,
+  "name": "Alden Kass",
+  "level": 4,
+  "class": "Wizard",
+  "experience": 2968,
   "base_armor_class": 10,
-  "initiative_bonus": 0,
+  "initiative_bonus": 5,
   "speed": 30,
-  "maximum_hit_points": 55,
-  "current_hit_points": 55,
-  "temporary_hit_points": 15,
+  "maximum_hit_points": 23,
+  "current_hit_points": 23,
+  "temporary_hit_points": 0,
   "hit_dice_total": {
-    "sides": 12,
-    "count": 5
+    "sides": 6,
+    "count": 4
   },
   "hit_dice_used": {
-    "sides": 12,
+    "sides": 6,
     "count": 0
   },
   "death_saves": {
@@ -22,57 +22,57 @@
     "failures": 0
   },
   "inspiration": false,
-  "proficiency_bonus": 3,
+  "proficiency_bonus": 2,
   "stats": {
     "strength": {
       "stat": "Strength",
-      "value": 18,
-      "modifier": 4,
+      "value": 8,
+      "modifier": -1,
       "saving_throw_proficiency": false
     },
     "dexterity": {
       "stat": "Dexterity",
-      "value": 16,
-      "modifier": 3,
-      "saving_throw_proficiency": true
-    },
-    "constitution": {
-      "stat": "Constitution",
       "value": 14,
       "modifier": 2,
       "saving_throw_proficiency": false
     },
+    "constitution": {
+      "stat": "Constitution",
+      "value": 13,
+      "modifier": 1,
+      "saving_throw_proficiency": false
+    },
     "intelligence": {
       "stat": "Intelligence",
-      "value": 12,
-      "modifier": 1,
+      "value": 20,
+      "modifier": 5,
       "saving_throw_proficiency": true
     },
     "wisdom": {
       "stat": "Wisdom",
-      "value": 10,
-      "modifier": 0,
-      "saving_throw_proficiency": false
+      "value": 12,
+      "modifier": 1,
+      "saving_throw_proficiency": true
     },
     "charisma": {
       "stat": "Charisma",
-      "value": 8,
-      "modifier": -1,
-      "saving_throw_proficiency": true
+      "value": 12,
+      "modifier": 1,
+      "saving_throw_proficiency": false
     }
   },
   "skills": {
     "acrobatics": {
       "base_ability": "Dexterity",
       "skill_type": "Acrobatics",
-      "proficiency": true,
+      "proficiency": false,
       "expertise": false,
       "other_bonus": 0
     },
     "animal_handling": {
       "base_ability": "Wisdom",
       "skill_type": "AnimalHandling",
-      "proficiency": true,
+      "proficiency": false,
       "expertise": false,
       "other_bonus": 0
     },
@@ -86,21 +86,21 @@
     "athletics": {
       "base_ability": "Strength",
       "skill_type": "Athletics",
-      "proficiency": true,
-      "expertise": true,
+      "proficiency": false,
+      "expertise": false,
       "other_bonus": 0
     },
     "deception": {
       "base_ability": "Charisma",
       "skill_type": "Deception",
-      "proficiency": true,
-      "expertise": true,
+      "proficiency": false,
+      "expertise": false,
       "other_bonus": 0
     },
     "history": {
       "base_ability": "Intelligence",
       "skill_type": "History",
-      "proficiency": false,
+      "proficiency": true,
       "expertise": false,
       "other_bonus": 0
     },
@@ -121,7 +121,7 @@
     "investigation": {
       "base_ability": "Intelligence",
       "skill_type": "Investigation",
-      "proficiency": false,
+      "proficiency": true,
       "expertise": false,
       "other_bonus": 0
     },
@@ -163,7 +163,7 @@
     "religion": {
       "base_ability": "Intelligence",
       "skill_type": "Religion",
-      "proficiency": false,
+      "proficiency": true,
       "expertise": false,
       "other_bonus": 0
     },
@@ -203,10 +203,6 @@
       true
     ],
     [
-      "Sapping Sting",
-      true
-    ],
-    [
       "Fire Bolt",
       true
     ],
@@ -243,39 +239,7 @@
       false
     ],
     [
-      "Maximillian's Earthen Grasp",
-      false
-    ],
-    [
       "Knock",
-      false
-    ],
-    [
-      "Extreme flaming sphere",
-      false
-    ],
-    [
-      "super extra Flaming Sphere",
-      false
-    ],
-    [
-      "deal dmg spell",
-      false
-    ],
-    [
-      "fire blowww",
-      false
-    ],
-    [
-      "extreme 7th lvl spell",
-      false
-    ],
-    [
-      "spicy fire explosion",
-      false
-    ],
-    [
-      "the biggest blow",
       false
     ]
   ]

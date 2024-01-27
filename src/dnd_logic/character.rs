@@ -93,7 +93,7 @@ impl Character {
         self.level += 1;
         self.proficiency_bonus = proficiency_bonus(self.level);
         self.experience = exp_needed_to_lvl(self.level);
-        self.hit_dice_total.count += 1;
+        self.hit_dice_total.count = self.level;
     }
 
     pub fn subtract_level(&mut self) {
@@ -103,9 +103,14 @@ impl Character {
         self.level -= 1;
         self.proficiency_bonus = proficiency_bonus(self.level);
         self.experience = exp_needed_to_lvl(self.level);
+        self.hit_dice_total.count = self.level;
     }
 
-    pub fn get_class(&mut self) -> &mut Class {
+    pub fn get_class(&mut self) -> &Class {
+        &mut self.class
+    }
+
+    pub fn get_class_mut(&mut self) -> &mut Class {
         &mut self.class
     }
 
@@ -158,6 +163,13 @@ impl Character {
             return;
         }
         self.speed -= 5;
+    }
+
+    pub fn set_class(&mut self, class: Class) {
+        self.class = class;
+        self.hit_dice_total = class.get_hit_dice();
+        self.hit_dice_total.count = self.level;
+        self.hit_dice_used = Dice::new(class.get_hit_dice().sides, 0);
     }
 
     pub fn get_hit_points_max(&self) -> i32 {

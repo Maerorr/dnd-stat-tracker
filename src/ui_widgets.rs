@@ -25,6 +25,7 @@ pub struct UiWidgets {
     spell_database: SpellList,
     display_add_spell_window: bool,
     add_spell_lvl: i32,
+    class_change: Class,
 }
 
 impl Default for UiWidgets {
@@ -48,6 +49,7 @@ impl Default for UiWidgets {
             spell_database: SpellList::default(),
             display_add_spell_window: false,
             add_spell_lvl: 0,
+            class_change: Class::Barbarian,
         }
     }
 }
@@ -121,7 +123,7 @@ impl UiWidgets {
             ui.label(format!("Proficiency Bonus: {}{}", prof_sign, character.proficiency_bonus.to_string()));
 
             draw_vertical_line_at_least(ui, Vec2::new(1.0, 25.0), egui::Color32::from_gray(100));
-
+            self.class_change = character.class;
             ui.label("Class:");
             if unsafe {EDIT_MODE} {
                 // add combo box with all classes
@@ -130,19 +132,20 @@ impl UiWidgets {
                 .show_ui(ui, |ui| {
                     ui.style_mut().wrap = Some(false);
                     ui.set_min_width(60.0);
-                    ui.selectable_value(character.get_class(), Class::Barbarian, "Barbarian");
-                    ui.selectable_value(character.get_class(), Class::Bard, "Bard");
-                    ui.selectable_value(character.get_class(), Class::Cleric, "Cleric");
-                    ui.selectable_value(character.get_class(), Class::Druid, "Druid");
-                    ui.selectable_value(character.get_class(), Class::Fighter, "Fighter");
-                    ui.selectable_value(character.get_class(), Class::Monk, "Monk");
-                    ui.selectable_value(character.get_class(), Class::Paladin, "Paladin");
-                    ui.selectable_value(character.get_class(), Class::Ranger, "Ranger");
-                    ui.selectable_value(character.get_class(), Class::Rogue, "Rogue");
-                    ui.selectable_value(character.get_class(), Class::Sorcerer, "Sorcerer");
-                    ui.selectable_value(character.get_class(), Class::Warlock, "Warlock");
-                    ui.selectable_value(character.get_class(), Class::Wizard, "Wizard");
+                    ui.selectable_value(&mut self.class_change, Class::Barbarian, "Barbarian");
+                    ui.selectable_value(&mut self.class_change, Class::Bard, "Bard");
+                    ui.selectable_value(&mut self.class_change, Class::Cleric, "Cleric");
+                    ui.selectable_value(&mut self.class_change, Class::Druid, "Druid");
+                    ui.selectable_value(&mut self.class_change, Class::Fighter, "Fighter");
+                    ui.selectable_value(&mut self.class_change, Class::Monk, "Monk");
+                    ui.selectable_value(&mut self.class_change, Class::Paladin, "Paladin");
+                    ui.selectable_value(&mut self.class_change, Class::Ranger, "Ranger");
+                    ui.selectable_value(&mut self.class_change, Class::Rogue, "Rogue");
+                    ui.selectable_value(&mut self.class_change, Class::Sorcerer, "Sorcerer");
+                    ui.selectable_value(&mut self.class_change, Class::Warlock, "Warlock");
+                    ui.selectable_value(&mut self.class_change, Class::Wizard, "Wizard");
                 });
+                character.set_class(self.class_change);
             } else {
                 ui.label(character.class.get_name());
             }
@@ -289,7 +292,8 @@ impl UiWidgets {
                                 if ui.button("-").clicked() {
                                     character.subtract_one_initiative();
                                 }
-                                let init = character.stats.get_stat(StatType::Dexterity).get_modifier() + character.initiative_bonus;
+                                let init = character.initiative_bonus;
+                                let dex_bonus = character.stats.get_stat(StatType::Dexterity).get_modifier();
                                 let init_sign = if init > 0 { "+" } else { "" };
                                 ui.label(format!("{}{}", init_sign, init));
                                 if ui.button("+").clicked() {

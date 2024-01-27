@@ -166,19 +166,19 @@ impl StatTracker {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         configure_text_styles(&cc.egui_ctx);
         let spell_database = load_spells_from_files();
-        let mut def_char = Character::test_character();
+        //let mut def_char = Character::test_character();
 
         let characters = load_characters(&spell_database);
 
         // add all spells from spell database to character
-        for spell in spell_database.cantrips.iter() {
-            def_char.add_spell(&spell.0);
-        }
-        for spell_list in spell_database.spells.iter() {
-            for spell in spell_list.iter() {
-                def_char.add_spell(&spell.0);
-            }
-        }
+        // for spell in spell_database.cantrips.iter() {
+        //     def_char.add_spell(&spell.0);
+        // }
+        // for spell_list in spell_database.spells.iter() {
+        //     for spell in spell_list.iter() {
+        //         def_char.add_spell(&spell.0);
+        //     }
+        // }
 
         let mut ui_widgets = UiWidgets::default();
         ui_widgets.set_spell_database(spell_database.clone());
@@ -204,5 +204,13 @@ impl StatTracker {
                 ui.end_row();
             }
         });
+    }
+
+    pub fn current_char_mut(&mut self) -> &mut Character {
+        &mut self.characters[self.current_character]
+    }
+
+    pub fn current_char(&self) -> &Character {
+        &self.characters[self.current_character]
     }
 }
