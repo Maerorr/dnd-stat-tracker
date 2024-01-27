@@ -690,7 +690,7 @@ impl UiWidgets {
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     
                 // DISPLAY CANTRIPS
-                for mut spell_0 in character.spell_list.get_cantrips() {
+                for mut spell_0 in character.spell_list.get_spells_of_level(0) {
                     let delete = draw_spell_entry(ctx, ui, &mut spell_0);
                     if delete {
                         spells_to_delete.push(spell_0.clone());
@@ -922,12 +922,7 @@ impl UiWidgets {
 
     pub fn display_add_spell(&mut self, ui: &egui::Ui, character: &mut Character, lvl: i32) {
         let spells_of_lvl = {
-            if lvl == 0 {
-                self.spell_database.get_cantrips().clone()
-
-            } else {
-                self.spell_database.get_spells_of_level(lvl).clone()
-            }
+            self.spell_database.get_spells_of_level(lvl).clone()
         };
         // display a new window with all spells as buttons
         egui::Window::new(format!("Add Spell Level {}", lvl))
@@ -939,7 +934,7 @@ impl UiWidgets {
                         continue;
                     }
                     if ui.button(spell.0.name.to_string()).clicked() {
-                        character.spell_list.add_spell(&spell.0, false);
+                        character.add_spell(&spell.0);
                     }
                 }
             });

@@ -281,6 +281,9 @@ impl Character {
     pub fn save_to_file(&mut self) {
         // copy all spell names and prepared value to spell_serialization_data
         self.spell_serialization_data.clear();
+        for cantrip in &self.spell_list.cantrips {
+            self.spell_serialization_data.push((cantrip.0.name.clone(), cantrip.1));
+        }
         for spells in &self.spell_list.spells {
             for spell in spells {
                 self.spell_serialization_data.push((spell.0.name.clone(), spell.1));

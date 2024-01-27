@@ -45,13 +45,10 @@ impl SpellList {
 
     pub fn get_spells_of_level(&mut self, level: i32) -> &mut Vec<(Spell, bool)> {
         match level {
+            0 => &mut self.cantrips,
             1..=9 => &mut self.spells[level as usize - 1],
             _ => panic!("{}: {}", "Invalid spell level", level.to_string()),
         }
-    }
-
-    pub fn get_cantrips(&mut self) -> &mut Vec<(Spell, bool)> {
-        &mut self.cantrips
     }
 
     pub fn get_spells_of_level_and_class(&mut self, level: i32, class: &Class) -> Vec<Spell> {
