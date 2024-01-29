@@ -30,6 +30,7 @@ pub struct Character {
 
     pub money: Money,
     pub features_and_traits: String,
+    pub proficiencies_and_languages: String,
 
     // DONT SERIALIZE / DESERIALIZE THIS FIELD
     #[serde(skip)]
@@ -62,6 +63,7 @@ impl Default for Character {
 
             stats: Stats::default(),
             features_and_traits: String::new(),
+            proficiencies_and_languages: String::new(),
             skills: Skills::default(),
             money: Money::default(),
             spell_list: SpellList::default(),

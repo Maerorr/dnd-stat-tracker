@@ -149,6 +149,23 @@ pub fn stat_tracker_ui(ctx: &Context, stat_tracker: &mut StatTracker) {
                     stat_tracker.ui_widgets.display_saving_throws_proficiencies(ui, &mut stat_tracker.characters[stat_tracker.current_character]);
                     ui.heading("Proficiencies");
                     stat_tracker.ui_widgets.display_proficiencies(ui, &mut stat_tracker.characters[stat_tracker.current_character]);
+                    ui.add_space(10.0);
+                    draw_horizontal_line_at_least(ui, Vec2::new(250.0, 0.0), MAIN_COLOR);
+                    ui.add_space(10.0);
+                    ui.label("Proficiencies & Languages");
+                    ui.add_space(20.0);
+                    let text_split = stat_tracker.characters[stat_tracker.current_character].proficiencies_and_languages.split("\n").collect::<Vec<_>>();
+                    for text in text_split.iter() {
+                        ui.horizontal_wrapped(|ui| {
+                            if !text.is_empty() {
+                                ui.set_max_width(250.0);
+                                ui.add(egui::Label::new(RichText::new(*text).size(18.0)));
+                            }
+                        });
+                    }
+                    // let (rect, _) = ui.allocate_exact_size(Vec2::new(250.0, 200.0), Sense::hover());
+                    // ui.put(rect, egui::TextEdit::multiline(&mut stat_tracker.characters[stat_tracker.current_character].proficiencies_and_languages));
+                    
                 });
 
                 ui.add_space(10.0);
