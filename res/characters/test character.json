@@ -279,5 +279,27 @@
       "the biggest blow",
       false
     ]
+  ],
+  "spell_slots_max": [
+    4,
+    3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "spell_slots_used": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
   ]
 }

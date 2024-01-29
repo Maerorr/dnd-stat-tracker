@@ -82,5 +82,4 @@ impl Class {
             Class::Gunslinger => Some(StatType::Wisdom),
         }
     }
-
 }

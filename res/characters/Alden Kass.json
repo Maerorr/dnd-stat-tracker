@@ -198,6 +198,28 @@
   },
   "features_and_traits": "Feats:\n1. Keen Mind\n- you know which way is north\n- you know exact time\n- you remember everything from past month\n\n# Arcane Recovery (short rest, once per day)\n- spell slots = level/2 rounded up\n- can't be 6th lvl or higher\n\n2-lvl\n# Chronal Shift (reaction, twice per long rest)\n- Any creature incl. yourself in 60ft. radius can be forced to rerol a d20. New outcome must be used.\n\n# Temporal Awareness\n- Add your INT to initiative.\n\n6-lvl\n# Momentary Stasis\n- Large or smaller creature within 60ft. needs to make a CON save. On fail it is in temporary stasis with speed of 0 and incapacitated status until the end of your next turn or until the creature takes any damage\n\n10-lvl\n# Arcane Abeyance (1action, once per long rest)\n- when casting a spell of 4th lvl or lower you can encase it in a gray bead for an hour (1HP, AC 15, immune to poison and psychic dmg). \n- It can be used to cast the encased spell without a spell slot, with stats of the caster\n\n14-lvl\n#convergent Future (1 exhaustion)\nYou can decide if an attack roll, ability check or a saving throw will fail or succeed.",
   "proficiencies_and_languages": "Languages: Common, Elven, Sylvan, Gnommish\n\nWeapons: daggers, darts, slings, quarterstaff, light crossbow\n\nArmor: -",
+  "spell_slots_max": [
+    4,
+    3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "spell_slots_used": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
   "spell_serialization_data": [
     [
       "Control Flames",

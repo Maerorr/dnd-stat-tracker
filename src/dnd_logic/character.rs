@@ -36,6 +36,9 @@ pub struct Character {
     #[serde(skip)]
     pub spell_list: SpellList,
 
+    pub spell_slots_max: Vec<i32>,
+    pub spell_slots_used: Vec<i32>,
+
     spell_serialization_data: Vec<(String, bool)>,
 }
 
@@ -67,6 +70,8 @@ impl Default for Character {
             skills: Skills::default(),
             money: Money::default(),
             spell_list: SpellList::default(),
+            spell_slots_max: Vec::with_capacity(9),
+            spell_slots_used: Vec::with_capacity(9),
             spell_serialization_data: Vec::new(),
         }
     }
@@ -320,5 +325,59 @@ impl Character {
             let spell = spell.unwrap();
             self.spell_list.add_spell(&spell, *prepared);
         }
+    }
+    pub fn add_one_spell_slot_max(&mut self, level: i32) {
+        if level < 1 || level > 9 {
+            return;
+        }
+        self.spell_slots_max[level as usize - 1] += 1;
+    }
+
+    pub fn subtract_one_spell_slot_max(&mut self, level: i32) {
+        if level < 1 || level > 9 {
+            return;
+        }
+        if self.spell_slots_max[level as usize - 1] <= 0 {
+            return;
+        }
+        self.spell_slots_max[level as usize - 1] -= 1;
+        // if spell slots used is equal to or greater than spell slots max, subtract one from spell slots used
+        if self.spell_slots_used[level as usize - 1] >= self.spell_slots_max[level as usize - 1] {
+            self.spell_slots_used[level as usize - 1] -= 1;
+        }
+    }
+
+    pub fn add_one_spell_slot_used(&mut self, level: i32) {
+        if level < 1 || level > 9 {
+            return;
+        }
+        if self.spell_slots_used[level as usize - 1] >= self.spell_slots_max[level as usize - 1] {
+            return;
+        }
+        self.spell_slots_used[level as usize - 1] += 1;
+    }
+
+    pub fn subtract_one_spell_slot_used(&mut self, level: i32) {
+        if level < 1 || level > 9 {
+            return;
+        }
+        if self.spell_slots_used[level as usize - 1] <= 0 {
+            return;
+        }
+        self.spell_slots_used[level as usize - 1] -= 1;
+    }
+
+    pub fn get_spell_slots_max(&self, lvl: i32) -> i32 {
+        if lvl < 1 || lvl > 9 {
+            return 0;
+        }
+        self.spell_slots_max[lvl as usize - 1]
+    }
+
+    pub fn get_spell_slots_used(&self, lvl: i32) -> i32 {
+        if lvl < 1 || lvl > 9 {
+            return 0;
+        }
+        self.spell_slots_used[lvl as usize - 1]
     }
 }

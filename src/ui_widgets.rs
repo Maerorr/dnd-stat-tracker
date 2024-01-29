@@ -713,7 +713,9 @@ impl UiWidgets {
                 }
                 
                 ui.add_space(20.0);
-                ui.label("Level 1");
+
+                display_level_and_spell_slots(ui, 1, character);
+                
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     
                 // DISPLAY LEVEL 1 SPELLS
@@ -736,7 +738,7 @@ impl UiWidgets {
                 }
     
                 ui.add_space(20.0);
-                ui.label("Level 2");
+                display_level_and_spell_slots(ui, 2, character);
                 
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     
@@ -760,7 +762,7 @@ impl UiWidgets {
                 }
             });
             ui.vertical(|ui| {
-                ui.label("Level 3");
+                display_level_and_spell_slots(ui, 3, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     
                 // DISPLAY LEVEL 3 SPELLS
@@ -783,7 +785,7 @@ impl UiWidgets {
                 }
     
                 ui.add_space(20.0);
-                ui.label("Level 4");
+                display_level_and_spell_slots(ui, 4, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
     
                 // DISPLAY LEVEL 4 SPELLS
@@ -806,7 +808,7 @@ impl UiWidgets {
                 }
 
                 ui.add_space(20.0);
-                ui.label("Level 5");
+                display_level_and_spell_slots(ui, 5, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
 
                 // DISPLAY LEVEL 5 SPELLS
@@ -829,7 +831,7 @@ impl UiWidgets {
                 }
             });
             ui.vertical(|ui|{
-                ui.label("Level 6");
+                display_level_and_spell_slots(ui, 6, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
 
                 // DISPLAY LEVEL 6 SPELLS
@@ -853,7 +855,7 @@ impl UiWidgets {
                 }
 
                 ui.add_space(20.0);
-                ui.label("Level 7");
+                display_level_and_spell_slots(ui, 7, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
 
                 // DISPLAY LEVEL 7 SPELLS
@@ -875,7 +877,7 @@ impl UiWidgets {
                 }
 
                 ui.add_space(20.0);
-                ui.label("Level 8");
+                display_level_and_spell_slots(ui, 8, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
 
                 // DISPLAY LEVEL 8 SPELLS
@@ -897,7 +899,7 @@ impl UiWidgets {
                 }
 
                 ui.add_space(20.0);
-                ui.label("Level 9");
+                display_level_and_spell_slots(ui, 9, character);
                 draw_horizontal_line_at_least(ui, Vec2::new(250.0, 1.0), egui::Color32::from_gray(100));
 
                 // DISPLAY LEVEL 9 SPELLS
@@ -1025,7 +1027,7 @@ pub fn draw_spell_entry(ctx: &egui::Context, ui: &mut egui::Ui, (spell, prepared
                 
                 spell.display_spell_name(ui);
             });
-            ui.end_row();
+            
             ui.with_layout(Layout::right_to_left(Align::RIGHT), |ui| {
                 if unsafe {EDIT_MODE} {
                     if ui.button("✖").clicked() {
@@ -1145,4 +1147,34 @@ fn small_checkbox(ui: &mut egui::Ui, checked: &mut bool) -> Response {
     }
 
     response
+}
+
+pub fn display_level_and_spell_slots(ui: &mut egui::Ui, lvl: i32, character: &mut Character) {
+    ui.allocate_ui(Vec2::new(250.0, 36.0), |ui| {
+        ui.horizontal(|ui| {
+            ui.with_layout(Layout::left_to_right(Align::LEFT), |ui| {
+                ui.label(RichText::new(format!("Level {}", lvl)));
+            });
+            ui.with_layout(Layout::right_to_left(Align::RIGHT), |ui| {
+                if unsafe {EDIT_MODE} {
+                    if ui.button("+").clicked() {
+                        character.add_one_spell_slot_max(lvl);
+                    }
+                    ui.label(RichText::new(format!("{}/{}", character.get_spell_slots_used(lvl), character.get_spell_slots_max(lvl))));
+                    if ui.button("-").clicked() {
+                        character.subtract_one_spell_slot_max(lvl);
+                    }
+                } else {
+                    if ui.button("+").clicked() {
+                        character.add_one_spell_slot_used(lvl);
+                    }
+                    ui.label(RichText::new(format!("{}/{}", character.get_spell_slots_used(lvl), character.get_spell_slots_max(lvl))));
+                    if ui.button("-").clicked() {
+                        character.subtract_one_spell_slot_used(lvl);
+                    }
+                }
+                
+            });
+        });
+    });
 }
